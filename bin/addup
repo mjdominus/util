@@ -1,0 +1,5 @@
+#!/usr/bin/perl -na
+BEGIN { $fieldno = shift }
+$total += defined($fieldno) ? (split(/\s+/))[$fieldno-1] : $_;
+
+END{print $total, "\n" }

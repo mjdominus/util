@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+
+use Fcntl qw(F_GETFD F_SETFD FD_CLOEXEC);
+use Getopt::Std;
+my %opt;
+getopts("F", \%opt) or usage();
+
+my $command = shift @ARGV
+  or usage();
+my $pat = '\.gz$';
+
+my @fh;
+my @old;
+
+for my $file (@ARGV) {
+  if ($file =~ /$pat/o && -f $file) {
+    my $fh;
+    unless (open($fh, "-|", "gzip", "-cd", $file)) {
+      warn "Couldn't open file '$file': $!; skipping\n";
+      next;
+    }
+    push @fh, $fh;
+    my $fd = fileno $fh;
+    my $flags = fcntl($fh, F_GETFD, 0);
+    fcntl($fh, F_SETFD, $flags & ~FD_CLOEXEC);
+    my $oldfile = $file;
+    $file = "/proc/self/fd/$fd";
+    $old[$fd] = $oldfile;
+#    warn "$oldfile -> $file\n";
+  }
+}
+
+# warn "running $command @ARGV\n";
+if ($opt{F}) {
+  open my($out), "-|", $command, @ARGV 
+    or die "Couldn't run '$command': $!.\n";
+  while (<$out>) {
+    s{/proc/self/fd/(\d+)}{$old[$1]}g;
+    print;
+  }
+  if (close($out)) { exit; }
+  elsif ($! == 0) { exit $? >> 8; }
+  else { exit 2; }
+} else {
+  exec $command, @ARGV;
+  die "Couldn't run '$command': $!.\n";
+}
+
+sub usage {
+  print STDERR "Usage: $0 [-F] command args...
+\t-F: try to transform filenames in output back to original filenames\n";
+  exit 1;
+}

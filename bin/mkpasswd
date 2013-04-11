@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+srand;
+use Getopt::Std;
+
+&getopts('l:cd:n:');
+
+@fruitcake = split //, '~`!@#$%^&*()_+-=[]{}\|;:\'",.<>/?';
+$dict = defined($opt_d) ? $opt_d : '/usr/share/dict/words';
+my $nwords = ($opt_n || 1) * 2;
+my $maxl = $opt_l || 8;
+
+open DICT, $dict
+    or die "Couldn't open dictionary file `$dict': $!; aborting";
+
+while (<DICT>) {
+  chomp;
+  next if /\W/;
+  next unless length($_) >= 3 && length($_) <= $maxl;
+  $count++;
+  next unless rand() < $nwords/$count;
+  if ($GOT >= $nwords) {
+    $words[$nwords * rand] = $_;
+  } else {
+    splice @words, rand(@words+1), 0, $_;
+  }
+  $GOT++;
+} 
+
+close DICT;
+
+while (@words) {
+  my $pw = 
+      randcap(shift @words) .
+      $fruitcake[rand @fruitcake].
+          randcap(shift @words);
+  print crypt($pw, rand_salt()), " " if $opt_c;
+  print $pw, "\n";
+}
+
+sub rand_salt {
+  @c = ('A' .. 'Z', 'a' .. 'z', '0' .. '9', '.', '/');
+  $c[rand @c] . $c[rand @c];
+}
+
+
+sub randcap {
+  my $w = shift;
+  ($w, ucfirst $w, uc $w)[rand 3];
+}
