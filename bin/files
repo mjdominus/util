@@ -1,0 +1,1 @@
+find "${@:-.}" \( -name .git -prune \) -o -type f -print

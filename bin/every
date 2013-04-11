@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+use Time::HiRes qw(sleep time);
+getopts('svx') or usage();
+
+my $freq = shift || usage();
+@ARGV or usage();
+
+while (1) {
+  my $start = time();
+  warn "Starting at " . localtime($start) . "\n" if $opt_v;
+  system(@ARGV);
+  my $rc = $?;
+  if ($rc & 255) {
+    warn "Command terminated with signal " . ($rc & 255) . "; exiting\n";
+    exit 1;
+  } elsif ($opt_x && ($rc >> 8)) {
+    warn "Command failed with exit status " . ($rc >> 8) . "; exiting\n";
+    exit 1;
+  }
+  my $elapsed = time() - $start;
+  warn "Completed after $elapsed sec.\n" if $opt_v;
+  my $zz = $opt_s ? $freq - $elapsed : $freq;
+  sleep $zz if $zz > 0;
+}
+
+sub usage {
+  print STDERR "Usage: $0 [-s] [-v] [-x] delay command args...
+
+  run command repeatedly, with <delay> secs between end of last run
+    and start of next one
+
+  -v  slightly verbose mode
+  -x  exit if command fails
+  -s  run command <delay> secs after *start* of last run and start of next one
+";
+  exit 1;
+}

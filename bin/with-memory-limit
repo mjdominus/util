@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+
+use BSD::Resource qw(setrlimit RLIMIT_VMEM RLIM_INFINITY);
+my ($mem) = shift // usage();
+@ARGV or usage();
+my ($n, $s) = $mem =~ /\A (\d+) ([kmgKMG]?) \z/x or usage();
+my $suf = { k => 1024,
+            m => 1024 * 1024,
+            g => 1024 * 1024 * 1024,
+          };
+
+if ($s) {
+  if (exists $suf->{lc $s}) {
+    $n *= $suf->{lc $s};
+  } else {
+    usage();
+  }
+}
+
+setrlimit(RLIMIT_VMEM,  $n , RLIM_INFINITY) or die "setrlimit: $!";
+exec @ARGV;
+die "$ARGV[0]: $!\n";
+
+sub usage {
+  die "usage: with-memory-limit AMOUNT command args...
+  AMOUNT is a number with an optional suffix of k, m, or g.\n";
+}

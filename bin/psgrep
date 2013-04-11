@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+#
+# Possible options:
+#  omit header line
+#  omit self from listing
+#  no metacharacters
+
+my $pat = shift or die "Usage: $0 pattern\n";
+open PS, "ps -augxww |"
+        or die "Couldn't run ps: $!; aborting";
+
+print scalar <PS>;              # header
+while (<PS>) {
+  print if /$pat/o;
+}
+
+
