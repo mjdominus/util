@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+getopts('us') or usage();
+use LWP::UserAgent;
+use HTTP::Status ();
+my $ua = LWP::UserAgent->new(agent => 'Mozilla');
+$ua->add_handler( response_data => \&receive );
+
+my $url = shift or usage();
+my $file = shift;
+unless (defined $file) {
+  require File::Basename;
+  $file = File::Basename::basename($url);
+  $file = "DEFAULT" unless defined $file;
+}
+my $tmpfile = ".getstore.$$";
+END { unlink $tmpfile }
+
+exit if $opt_s && -e $file;
+
+my $resp = getstore($url, $tmpfile);
+unless ($resp->is_success) {
+  print STDERR $resp->message, "\n";
+  exit 1;
+}
+
+if (-e $file) {
+  if ($opt_u) {
+    my ($base, $n, $suffix) = $file =~ /(.*?)(\d*)\.(.*)/;
+    $n = 1 unless defined $n;
+    do {
+      $n++;
+      $file = "$base$n.$suffix";
+    } while -e $file;
+    warn "... Using '$file' instead\n";
+  }
+}
+rename $tmpfile, $file or die "Couldn't rename $tmpfile -> $file: $!";
+
+sub usage {
+  print qq{
+Usage: $0 [-s] [-u] URL [file]
+    -s: if file already exists, exit
+    -u: if file already exists, use modified name 
+      };
+  exit 1;
+}
+
+my $fh;
+sub getstore {
+  my ($url, $tmpfile) = @_;
+  open $fh, ">", $tmpfile
+    or die "$tmpfile: $!";
+  return $ua->get($url);
+}
+
+sub receive {
+  my ($response, $ua, $h, $data) = @_;
+  if ($response->is_success) {
+    print $fh $data;
+  } else {
+    warn $response->status . "\n";
+  }
+}

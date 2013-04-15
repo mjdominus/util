@@ -3,7 +3,7 @@ usage message though.  Most are short enough that you can easily read the
 source code to see what they do.
 
 `addup` is a filter that adds up a series of numbers and prints the
-total.  `addup `*n* splits each line into fields and totals the *n*th
+total.  `addup `_n_ splits each line into fields and totals the _n_th
 field in each line.
 
 `copy-if-changed` doesn't work yet. Don't use it.
@@ -17,6 +17,10 @@ verbose; `-x` tells it to exit if any of the runs fail.
 '{print $6}'`, except with 80% less typing.  `f -1` works.
 
 `files` is a stupid one-liner: ` "${@:-.}" \( -name .git -prune \) -o -type f -print`.
+
+`getstore _url_ _file_` fetches the file at the given URL and stores
+it in the specified file.  If you omit the filename, it will be
+inferred from the URL.
 
 `menupick` is a filter reads a list of items from stdin, prints a menu
 of the items on the terminal, repeatedly prompts the terminal for a
