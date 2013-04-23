@@ -8,6 +8,9 @@ field in each line.
 
 `copy-if-changed` doesn't work yet. Don't use it.
 
+`count` generates a report of the unique lines in the input, sorted by
+frequency of occurrence.
+
 `every 15 command args...` runs the command every 15 seconds. Normally
 each run starts 15 seconds after the last one ended; `every -s` starts
 each commend 15 seconds after the last one *started*.  `-v` is
