@@ -44,6 +44,13 @@ options I never use.
 `psgrep` runs `ps` and greps the output, but leaves intact the header
 line that explains what the columns mean.
 
+`runN` runs a command repeatedly with different arguments, by default
+on process at a time, but the `-n N` option tells it to run up to _N_
+jobs in parallel.  [This version, by Aaron
+Crane](http://aaroncrane.co.uk/2008/07/runN/), has a better interface
+than [my original
+implementation](http://blog.plover.com/prog/runN.html).
+
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
 
