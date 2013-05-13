@@ -3,7 +3,7 @@ usage message though.  Most are short enough that you can easily read the
 source code to see what they do.
 
 `addup` is a filter that adds up a series of numbers and prints the
-total.  `addup `_n_ splits each line into fields and totals the _n_th
+total.  `addup` _n_ splits each line into fields and totals the n'th
 field in each line.
 
 `copy-if-changed` doesn't work yet. Don't use it.
@@ -24,6 +24,11 @@ verbose; `-x` tells it to exit if any of the runs fail.
 `getstore _url_ _file_` fetches the file at the given URL and stores
 it in the specified file.  If you omit the filename, it will be
 inferred from the URL.
+
+With arguments, `localtime` converts the arguments from epoch time to
+local time and prints the conversions one per line.  Without
+arguments, it is a filter, replacing an epoch time at the beginning of
+any input line to the corresponding local time.
 
 `menupick` is a filter reads a list of items from stdin, prints a menu
 of the items on the terminal, repeatedly prompts the terminal for a

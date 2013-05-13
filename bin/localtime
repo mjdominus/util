@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+if ($ARGV[0] eq '-f') {
+  *show_localtime = \&show_localtime_list;
+  shift;
+}
+
+if (@ARGV) {
+  for (@ARGV) {
+    print show_localtime($_), "\n";
+  }
+} else {
+  while (<>) {
+    s/^(\d+)/show_localtime($1)/e;
+    print;
+  }
+}
+
+
+sub show_localtime {
+  my $t = shift;
+  scalar localtime $t;
+}
+
+sub show_localtime_list {
+  my $t = shift;
+  my @a = localtime $t;
+  "@a\n"
+}
