@@ -56,6 +56,11 @@ Crane](http://aaroncrane.co.uk/2008/07/runN/), has a better interface
 than [my original
 implementation](http://blog.plover.com/prog/runN.html).
 
+`stouch` adjusts the last-modified dates on a set of files so that
+they appear to have been written in the order given on the command
+line.  This is useful for dealing with stupid photo gallery programs
+that insist on displaying files in chronological order.
+
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
 

@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+my %opt = (t => time(), i => 60);
+getopts('i:t:', \%opt) or usage();
+
+my $interval = $opt{i};
+my $time = $opt{t} - $interval * @ARGV;
+
+
+for my $file (@ARGV) {
+  unless (utime $time, $time, $file) {
+    warn "Couldn't touch '$file': $!";
+  }
+  $time += $interval;
+}
+
+
+sub usage {
+  print "Usage: stouch [-t end-time] [-i separation-interval] files...
+\tend-time is an epoch-time; defaults to now
+\tseparation-interval is in seconds, defaults to 1m
+";
+  exit 2;
+}
