@@ -11,6 +11,10 @@ field in each line.
 `count` generates a report of the unique lines in the input, sorted by
 frequency of occurrence.
 
+`dus` is like the standard `du` program, but lists the sizes of files
+as well as the totals for each directory.  `dus -n` sorts the output
+by size.
+
 `every 15 command args...` runs the command every 15 seconds. Normally
 each run starts 15 seconds after the last one ended; `every -s` starts
 each commend 15 seconds after the last one *started*.  `-v` is
