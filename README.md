@@ -60,6 +60,17 @@ Crane](http://aaroncrane.co.uk/2008/07/runN/), has a better interface
 than [my original
 implementation](http://blog.plover.com/prog/runN.html).
 
+`sort-natural` sorts its input lines like `sort`, but arranges to sort
+the numeric parts of the lines numerically. For example, 
+
+        a a1 a10 a100 a10x a2 a21 a3 ab b
+
+sorts into the order
+
+        a a1 a2 a3 a10 a10x a21 a100 ab b
+
+with the numeric parts of the `a` sequence in numerical order.
+
 `stouch` adjusts the last-modified dates on a set of files so that
 they appear to have been written in the order given on the command
 line.  This is useful for dealing with stupid photo gallery programs

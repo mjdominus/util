@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+sub natural {
+  my @a = grep length, split /(\d+)/, $a;
+  my @b = grep length, split /(\d+)/, $b;
+  while (@a && @b) {
+    my ($a0, $b0) = (shift(@a), shift(@b));
+    my $d;
+    if ($a0 =~ /^\d+$/ && $b0 =~ /^\d+/) {
+      $d = ($a0 <=> $b0 || $a0 cmp $b0);
+    } else {
+      $d = ($a0 cmp $b0);
+    }
+    return $d if $d;
+  }
+  return @a ? 1 : @b ? -1 : 0;
+}
+
+my @lines = <>;
+chomp @lines;
+print join "\n", sort natural @lines;
+print "\n";
+
+
