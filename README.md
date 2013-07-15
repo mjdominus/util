@@ -2,6 +2,8 @@ Documentation may or may not be forthcoming for these.  Some do have a
 usage message though.  Most are short enough that you can easily read the
 source code to see what they do.
 
+Also relevant: [git-util](https://github.com/mjdominus/git-util) [pbmutil](https://github.com/mjdominus/pbmutil)
+
 `addup` is a filter that adds up a series of numbers and prints the
 total.  `addup` _n_ splits each line into fields and totals the n'th
 field in each line.
