@@ -63,7 +63,7 @@ sub copy_file {
   my $dir = dirname($df);
   open my($s), "<". $sf
     or die "Couldn't open file '$sf': $!";
-  my ($d, $tf) = tempfile(".tmpfileXXXXX", $dir)
+  my ($d, $tf) = tempfile(".tmpfileXXXXX", DIR => $dir)
     or die "Couldn't start tempfile in directory '$dir': $!";
   { local $/ = 8192;
     while (my $rec = <$s>) {
