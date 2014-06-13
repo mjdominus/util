@@ -1,0 +1,46 @@
+#!/usr/local/bin/perl
+
+use Getopt::Std;
+use Linux::Inotify;
+use Time::HiRes qw(time sleep);
+use Data::Dumper;
+
+my $default_z = 1;
+my %opt = (x => 0, z => $default_z, 1 => 0);
+usage() unless getopts("xz:1", \%opt);
+my ($file, $cmd, @args) = @ARGV;
+defined($cmd) or usage();
+
+
+my $notifier = Linux::Inotify->new();
+my $mask = Linux::Inotify::MODIFY;
+my $watch = $notifier->add_watch($file, $mask);
+
+my $last_notify = 0;
+while (1) {
+  my @events = $notifier->read;
+  my $elapsed = time() - $last_notify;
+  my $sleep = $opt{z} - $elapsed;
+  if ($sleep > 0) {
+    sleep $sleep;
+    push @events, $notifier->read
+  }
+#  print Data::Dumper::Dumper("event", $_) for @events;
+  unless (system($cmd, @args) == 0) {
+    warn("command failed $?");
+    exit 3 if $opt{x};
+  }
+  $last_notify = time();
+}
+
+
+sub usage {
+  print STDERR qq{Usage: ifchanged [-z secs] [-x1] file command args...
+
+    Run command whenever the file changes
+    Checks after 'secs' secs, $default_z by default
+    Exit after the first execution of the command if -1 is given
+    Exit if the command runs unsuccessfully if -x is given
+};
+  exit 2;
+}

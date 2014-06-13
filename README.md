@@ -35,6 +35,9 @@ verbose; `-x` tells it to exit if any of the runs fail.
 it in the specified file.  If you omit the filename, it will be
 inferred from the URL.
 
+`ifchanged` watches a file using the Linux "inotify" facility and runs
+a command whenever the file changes.
+
 With arguments, `localtime` converts the arguments from epoch time to
 local time and prints the conversions one per line.  Without
 arguments, it is a filter, replacing an epoch time at the beginning of
