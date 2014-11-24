@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+use DateTime;
+
+my $base_iso = shift;
+my ($y, $m, $d);
+my $sep;
+if ($base_iso =~ /^ (\d{4}) (\D*) (\d{2}) \2  (\d{2}) $/x) {
+    ($y, $m, $d) = ($1, $3, $4);
+    $sep = $2;
+}
+my $base = DateTime->new(year => $y, month => $m, day => $d);
+my $con = 1;
+for my $arg (@ARGV) {
+  if ($arg eq "-") {
+    $con = -1;
+  } elsif ($arg eq "+") {
+    $con = +1;
+  } elsif ($arg =~ /^\d+/) {
+    $base->add(days => $arg * $con);
+    $con = +1;
+  } elsif ($arg =~ /^\+(\d+)/) {
+    $base->add(days => $1);
+  } elsif ($arg =~ /^\-(\d+)/) {
+    $base->add(days => -$1);
+  }
+}
+
+print $base->ymd($sep), "\n";
+

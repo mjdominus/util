@@ -13,6 +13,10 @@ field in each line.
 `count` generates a report of the unique lines in the input, sorted by
 frequency of occurrence.
 
+`date-arith` takes an argument list like `2014-12-23 +12`, interprets
+`+12` as “plus 12 days”, and prints the resulting date in the same
+format.
+
 `dus` is like the standard `du` program, but lists the sizes of files
 as well as the totals for each directory.  `dus -n` sorts the output
 by size.
