@@ -46,18 +46,23 @@ any input line to the corresponding local time.
 `menupick` is a filter reads a list of items from stdin, prints a menu
 of the items on the terminal, repeatedly prompts the terminal for a
 selection of items, and prints the selected items on stdout when the
-prompting is over.  Responses to the prompt are a series of numbers,
-which identify items that are added to the current selection, and
-numbers with prefixed `!` marks, which are removed from the current
-selection.  Any number of such items can be entered at once,
-sepearated by whitespace.  An empty line, or a line that ends with
-`!`, terminates the prompting.  If an input line ends with `?`, the
-list of currently-selected items will be printed before the next
-prompt; if it ends with `??` the menu will be redisplayed, with
-selected items marked.  For example: `emacs $(ls | menupick)`.
+prompting is over.  For example: `emacs $(ls | menupick)`.
 
-`mkpasswd` generates and prints a random password. It has a bunch of
-options I never use.
+    Responses to the prompt are a series of numbers, which identify
+    items that are added to the current selection, and numbers with
+    prefixed `!` marks, which are removed from the current selection.
+    Any number of such items can be entered at once, sepearated by
+    whitespace.
+
+    An empty line, or a line that ends with `!`, terminates the
+    prompting.  If an input line ends with `?`, the list of
+    currently-selected items will be printed before the next prompt;
+    if it ends with `??` the menu will be redisplayed, with selected
+    items marked.
+
+    If the number of items is large, lines containing `j` or `n` move
+    to the next page of the menu, and `k` or `p` move to the previous
+    page.
 
 `psgrep` runs `ps` and greps the output, but leaves intact the header
 line that explains what the columns mean.
