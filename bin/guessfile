@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+use File::Find;
+use Getopt::Std;
+getopts('aid:', \%opt) or usage();
+my @dirs =  split /:/, $opt{d} // $ENV{GUESSFILE_PATH} // ".";
+my %prune = map {$_ => 1} split /:/, $ENV{GUESSFILE_PRUNE} // ".git";
+
+
+my $full_path;
+my $re = do { my $rx = pat_to_regex(shift());
+              $full_path = ($rx =~ m#/#);
+              $rx = "(?i)$rx" if $opt{i};
+              qr/$rx/;
+            };
+
+my @match;
+find(sub { $File::Find::prune=1, return if $prune{$_};
+           my $target = $full_path ? $File::Find::name : $_;
+           return if ! $opt{a} && ! -f ;
+           print $File::Find::name, "\n" if $target =~ /$re/ },
+     @dirs);
+
+
+sub pat_to_regex {
+  my ($before) = my ($pat) = @_;
+  $pat =~ s#::#/#g;
+  $pat =~ s#\.#\\.#g;
+  $pat =~ s#\*#.*#g;
+  if ($pat =~ /\\\. \w+ \z/x) {
+    $pat .= "\\z";
+  }
+#  warn "  $before -> /$pat/\n";
+  return $pat;
+}

@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# Usage:
+#  withsome command pat
+exec $1 $(guessfile $2 | menupick)

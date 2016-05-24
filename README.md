@@ -35,6 +35,22 @@ verbose; `-x` tells it to exit if any of the runs fail.
 it in the specified file.  If you omit the filename, it will be
 inferred from the URL.
 
+`guessfile` takes a pattern and tries to find files matching the
+pattern, which it then prints out.  Patterns are shell glob style,
+with some modifications: if the pattern contains `::`, this is
+translated to a slash (for searching for Perl modules) and patterns
+are _unanchored_, except that if one contains a suffix like `.txt` it
+is anchored to the end.  Only the base filename is matched against the
+pattern, unless the pattern contains a slash, in which case the full
+path is matched.  Environment variables control the directories to be
+searched (default `.` unless overridden by the `-d` flag) and to be
+ignored (default `.git`).  `-i` makes the match case-insensitive.  The
+`withsome` command, inspired by [Ronald Schmidt's command of the
+same name](http://software-path.com/withsome.html), is a wrapper
+around `guessfile` and `menupick`: `withsome command pat` guesses
+files matching `pat`, filters the guesses with `menupick`, and then
+runs the `command` on the selected files.
+
 `ifchanged` watches a file using the Linux "inotify" facility and runs
 a command whenever the file changes.
 
