@@ -6,19 +6,25 @@ getopts('aid:', \%opt) or usage();
 my @dirs =  split /:/, $opt{d} // default_dirlist();
 my %prune = map {$_ => 1} split /:/, $ENV{GUESSFILE_PRUNE} // ".git";
 
-
 my $full_path;
-my $re = do { my $rx = pat_to_regex(shift());
-              $full_path = ($rx =~ m#/#);
-              $rx = "(?i)$rx" if $opt{i};
-              qr/$rx/;
-            };
+usage() unless @ARGV;
+my @re;
+for my $pat (@ARGV) {
+    push @re, do { my $rx = pat_to_regex($pat);
+                   $full_path = ($rx =~ m#/#);
+                   $rx = "(?i)$rx" if $opt{i};
+                   qr/$rx/;
+    };
+}
 
 my @match;
 find(sub { $File::Find::prune=1, return if $prune{$_};
            my $target = $full_path ? $File::Find::name : $_;
            return if ! $opt{a} && ! -f ;
-           print $File::Find::name, "\n" if $target =~ /$re/ },
+           for my $re (@re) {
+               print $File::Find::name, "\n" and last if $target =~ /$re/
+           }
+     },
      @dirs);
 
 
@@ -41,7 +47,7 @@ sub default_dirlist {
 
 sub usage {
     my $default_dirlist = default_dirlist();
-    print STDERR qq{guessfile [-ai] [-d dir1:dir2:…] pattern
+    print STDERR qq{guessfile [-ai] [-d dir1:dir2:…] pattern…
 
     -a : return all matching paths, not just plain files
     -i : case-insensitive atching

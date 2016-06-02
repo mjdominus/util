@@ -35,8 +35,9 @@ verbose; `-x` tells it to exit if any of the runs fail.
 it in the specified file.  If you omit the filename, it will be
 inferred from the URL.
 
-`guessfile` takes a pattern and tries to find files matching the
-pattern, which it then prints out.  Patterns are shell glob style,
+`guessfile` takes  a list of patterns
+and prints out name of  files matching one of the patterns.
+Patterns are shell glob style,
 with some modifications: if the pattern contains `::`, this is
 translated to a slash (for searching for Perl modules) and patterns
 are _unanchored_, except that if one contains a suffix like `.txt` it
