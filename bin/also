@@ -1,0 +1,15 @@
+#!/bin/bash
+# Old definition: alias also='emacsclient --no-wait '
+
+files=$(guessfile "$@" | menupick -1)
+if [ "x$files" = "x" ]; then
+  exit 0;
+fi
+
+if [ -z "$EMACS_SERVER_SOCKET" ]; then
+  s_opt=""
+else
+  s_opt="-s $EMACS_SERVER_SOCKET"
+fi
+
+emacsclient $s_opt --no-wait $files &

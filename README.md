@@ -8,6 +8,11 @@ Also relevant: [git-util](https://github.com/mjdominus/git-util) [pbmutil](https
 total.  `addup` _n_ splits each line into fields and totals the n'th
 field in each line.
 
+`also` is a wrapper around `guessfile` and `menupick`, described
+below.  It guesses which files you might have meant, presents a menu
+to let you select which ones you actually meant, and then opens emacs
+buffers for those files.
+
 `copy-if-changed` doesn't work yet. Don't use it.
 
 `count` generates a report of the unique lines in the input, sorted by
