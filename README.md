@@ -86,6 +86,10 @@ prompting is over.  For example: `emacs $(ls | menupick)`.
     to the next page of the menu, and `k` or `p` move to the previous
     page.
 
+`pgrep` is an implementation of `grep` in Perl that uses Perl regular
+expressions, implements a couple of features I use a lot, and
+eliminates a vast number of features I never use.
+
 `psgrep` runs `ps` and greps the output, but leaves intact the header
 line that explains what the columns mean.
 

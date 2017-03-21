@@ -1,0 +1,87 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+my $opts = '0:ulhIive:F:qB';
+getopts($opts) or usage();
+my $pat = defined($opt_e) ? $opt_e : @ARGV ? shift : usage();
+my $qr = $opt_i ? qr/$pat/i : qr/$pat/;
+
+my $format;
+
+if (defined $opt_F) {
+  $format = $opt_F . "\n";
+} else {
+  my %format = (l => '%s'."\n",
+                h => '%2$s'."\n",
+                q => "",
+                "" => $opt_I || @ARGV > 1 ? "%s: %s\n" : '%2$s'."\n",
+               );
+  my $fk = "";
+  $fk .= 'l' if $opt_l;
+  $fk .= 'h' if $opt_h;
+  $fk .= 'q' if $opt_q;
+  $format = $format{$fk};
+  unless (defined $format) {
+    warn "Incompatible options.\n";
+    usage();
+  }
+}
+
+$| = 1 if $opt_u;
+
+$rc = 1;  # No matches;
+
+if ($opt_I) {
+  while (<STDIN>) { chomp; do_file($_) }
+} elsif (@ARGV) {
+  do_file($_) for @ARGV;
+} else {
+  do_file(\*STDIN);
+}
+exit $rc;
+
+sub do_file {
+  my $file = shift;
+  my $fh;
+  if (ref $file) {
+    $fh = $file;
+    $file = "<stdin>";
+  } else {
+    return if !$opt_B && !$opt_l && ! $opt_q && -B $file;
+    return if -d $file;
+    unless (open $fh, "<", $file) {
+      warn "Couldn't open '$file': $!; skipping\n";
+      return;
+    }
+  }
+
+  local $/ = $/;
+  $/ = $opt_0 if defined $opt_0;
+  while (<$fh>) {
+    chomp;
+    if (/$qr/ ^ $opt_v) {
+      $rc = 0;                  # match
+      printf $format, $file, $_, $.;
+      return if $opt_l;
+    }
+  }
+}
+
+sub usage {
+  print STDERR <<EOM;
+ Usage: $0 [$opts] pattern files...
+
+    -B           don't ignore binary files
+    -F format    printf-style output format 
+                 (%1\$s = filename, %2\$s = text, %3\$d = line number)
+    -e pattern   specify pattern
+    -h           omit filenames
+    -i           case-insensitive match
+    -I           list of files on STDIN instead of in ARGV
+    -l           print filenames only
+    -q           print nothing
+    -u           make output unbuffered
+    -v           invert matching
+EOM
+  exit 2;
+}
