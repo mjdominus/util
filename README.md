@@ -111,6 +111,10 @@ sorts into the order
 
 with the numeric parts of the `a` sequence in numerical order.
 
+`spot` reads an input and emphasizes the differences from line to line
+by erasing the parts of each line that match the previous line.  Try
+`ls -l | spot` to see what it does.
+
 `stouch` adjusts the last-modified dates on a set of files so that
 they appear to have been written in the order given on the command
 line.  This is useful for dealing with stupid photo gallery programs

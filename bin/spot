@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+
+use strict;
+use Getopt::Std;
+
+# -c s  set spot character to s instead of to .
+# -p dot out prefixes only
+# -s dot out space characters also
+my %opt = (c => '.');
+getopts("c:ps", \%opt) || usage();
+
+my $prev;
+while (<>) {
+  my $orig = $_;
+  if (defined $prev) {
+    for my $pos (0 .. min(length($prev), length($_))-1 ) {
+      my $c = \substr($_, $pos, 1);
+      next if !$opt{s} && $$c =~ /\s/;
+      if (substr($prev, $pos, 1) eq $$c) {
+        $$c = $opt{c};
+      } elsif ($opt{p}) { last }
+    }
+  }
+  $prev = $orig;
+  print;
+}
+
+sub min {
+  my ($min, @n) = @_;
+  return unless defined $min;
+  $min = $min < $_ ? $min : $_ for @n;
+  return $min;
+}
+
+sub usage {
+    print STDERR "Usage: spot [-ps] [-c char] [files...]
+        -c char   replace matching parts of input with char instead of with a spot
+        -p        only replace matching prefixes
+        -s        also replace matching whitespace
+";
+    exit 2;
+}
