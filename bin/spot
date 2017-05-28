@@ -9,20 +9,16 @@ use Getopt::Std;
 my %opt = (c => '.');
 getopts("c:ps", \%opt) || usage();
 
-my $prev;
+my @field_spec = (0);
+my @prevs;
 while (<>) {
-  my $orig = $_;
-  if (defined $prev) {
-    for my $pos (0 .. min(length($prev), length($_))-1 ) {
-      my $c = \substr($_, $pos, 1);
-      next if !$opt{s} && $$c =~ /\s/;
-      if (substr($prev, $pos, 1) eq $$c) {
-        $$c = $opt{c};
-      } elsif ($opt{p}) { last }
-    }
+  my @orig_fields = my_split($_);
+  my @out_fields;
+  for my $i (0 .. $#orig_fields) {
+    push @out_fields, differences($orig_fields[$i], $prevs[$i]);
   }
-  $prev = $orig;
-  print;
+  print_fields(@out_fields);
+  @prevs = @orig_fields;
 }
 
 sub min {
@@ -30,6 +26,46 @@ sub min {
   return unless defined $min;
   $min = $min < $_ ? $min : $_ for @n;
   return $min;
+}
+
+sub my_split {
+  my ($rec) = @_;
+  my @fspec = @field_spec;
+  my @out;
+  while (@fspec) {
+    my ($start, $end) = splice @fspec, 0, 2;
+    if (defined $end) {
+      push @out, substr($rec, $start, $end-$start);
+    } else {
+      push @out, substr($rec, $start);
+    }
+  }
+  return @out;
+}
+
+sub differences {
+  my ($cur, $prev) = @_;
+  return $cur unless defined $prev;
+  for my $pos (0 .. min(length($prev), length($cur))-1 ) {
+    my $c = \substr($cur, $pos, 1);
+    next if !$opt{s} && $$c =~ /\s/;
+    if (substr($prev, $pos, 1) eq $$c) {
+      $$c = $opt{c};
+    } elsif ($opt{p}) { last }
+  }
+  return $cur;
+}
+
+sub print_fields {
+  my (@out) = @_;
+  my $cur_pos = 0;
+  my @fspec = @field_spec;
+  while (@fspec) {
+    my ($start, $end) = splice @fspec, 0, 2;
+    print " " x ($cur_pos - $start);
+    print shift @out;
+    $cur_pos = $end;
+  }
 }
 
 sub usage {
