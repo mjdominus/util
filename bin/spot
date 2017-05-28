@@ -6,10 +6,20 @@ use Getopt::Std;
 # -c s  set spot character to s instead of to .
 # -p dot out prefixes only
 # -s dot out space characters also
+# -F auto-field-detection mode
+# -f start,end,start,end,start  field specification
 my %opt = (c => '.');
-getopts("c:ps", \%opt) || usage();
+getopts("Ff:c:ps", \%opt) || usage();
 
 my @field_spec = (0);
+if ($opt{f} && $opt{F}) {
+    usage("field specified -f is incompatible with auto-field detection -F");
+} elsif ($opt{f}) {
+    @field_spec = split /\,\s*/, $opt{f};
+} elsif ($opt{F}) {
+    usage("auto-field detection -F is not yet implemented");
+}
+
 my @prevs;
 while (<>) {
   my @orig_fields = my_split($_);
@@ -69,6 +79,8 @@ sub print_fields {
 }
 
 sub usage {
+    my ($msg) = @_;
+    print STDERR $msg, "\n" if defined $msg;
     print STDERR "Usage: spot [-ps] [-c char] [files...]
         -c char   replace matching parts of input with char instead of with a spot
         -p        only replace matching prefixes
