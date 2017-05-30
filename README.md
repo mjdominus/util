@@ -28,7 +28,7 @@ by size.
 
 `every 15 command args...` runs the command every 15 seconds. Normally
 each run starts 15 seconds after the last one ended; `every -s` starts
-each commend 15 seconds after the last one *started*.  `-v` is
+each command 15 seconds after the last one *started*.  `-v` is
 verbose; `-x` tells it to exit if any of the runs fail.
 
 `f` is the most useful of the bunch.  `f 6` is the same as `awk
