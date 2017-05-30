@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+chomp(my @w = <>);
+@w = sort { length($a) <=> length($b) || $a cmp $b } @w;
+print join "\n", @w, "";

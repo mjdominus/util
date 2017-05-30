@@ -112,6 +112,9 @@ sorts into the order
 
 with the numeric parts of the `a` sequence in numerical order.
 
+`sortbylength` is a filter that sorts its input lines from shortest to
+longest.
+
 `spot` reads an input and emphasizes the differences from line to line
 by erasing the parts of each line that match the previous line.  Try
 `ls -l | spot` to see what it does.
