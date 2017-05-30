@@ -2,16 +2,17 @@
 #
 # Possible options:
 #  omit header line
-#  omit self from listing
 #  no metacharacters
 
 my $pat = shift or die "Usage: $0 pattern\n";
-open PS, "ps -augxww |"
-        or die "Couldn't run ps: $!; aborting";
+my $ps_pid = open PS, "ps -augxww |"
+    or die "Couldn't run ps: $!; aborting";
 
 print scalar <PS>;              # header
+my $match = 0;
 while (<PS>) {
-  print if /$pat/o;
+  my (undef, $pid) = split;
+  next if $pid == $$ || $pid == $ps_pid;           # skip psgrep itself
+  $match++, print if /$pat/o;
 }
-
-
+exit($match > 0 ? 0 : 1);

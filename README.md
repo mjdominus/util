@@ -91,7 +91,8 @@ expressions, implements a couple of features I use a lot, and
 eliminates a vast number of features I never use.
 
 `psgrep` runs `ps` and greps the output, but leaves intact the header
-line that explains what the columns mean.
+line that explains what the columns mean.  It also omits itself and
+its own `ps` from the output.
 
 `runN` runs a command repeatedly with different arguments, by default
 on process at a time, but the `-n N` option tells it to run up to _N_
