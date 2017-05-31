@@ -65,6 +65,10 @@ local time and prints the conversions one per line.  Without
 arguments, it is a filter, replacing an epoch time at the beginning of
 any input line to the corresponding local time.
 
+`indir` runs a command in some other directory.  It saves you from
+having to chrid there manually and then chdir back, and may save a
+conceptual step.
+
 `menupick` is a filter reads a list of items from stdin, prints a menu
 of the items on the terminal, repeatedly prompts the terminal for a
 selection of items, and prints the selected items on stdout when the

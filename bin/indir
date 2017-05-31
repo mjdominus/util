@@ -1,0 +1,5 @@
+#!/bin/bash
+dir=${1:-$(echo "Usage: indir directory command args..." 1>&2; exit 2)}
+shift
+cd $dir || exit 1
+exec "$@"
