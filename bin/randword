@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+my $default_file = '/usr/share/dict/american-english';
+my %opt = (n => 1);
+use Getopt::Std;
+getopts('n:', \%opt) or usage();
+
+my $N = $opt{n};
+my @w;
+
+@ARGV = ($default_file) unless @ARGV;
+while (<>) {
+  chomp;
+  if (@w < $N) { push @w, $_; next; }
+  $w[rand @w] = $_ if rand() < $N / $.;
+}
+print join "\n", @w, "";
+
+sub usage { print STDERR "Usage: randword [-n num_lines] [dictionary-files...]
+    Emit num_lines randomly selected from the input; default is 1.
+    Default input is '$default_file'
+";
+            exit 2;
+}
+

@@ -98,6 +98,10 @@ eliminates a vast number of features I never use.
 line that explains what the columns mean.  It also omits itself and
 its own `ps` from the output.
 
+`randword` selects a random line from its input, by default a
+dictionary file.  With `-n` it selects more than one line.  The outputs
+are selected equiprobably, and the input is not stored in memory.
+
 `runN` runs a command repeatedly with different arguments, by default
 on process at a time, but the `-n N` option tells it to run up to _N_
 jobs in parallel.  [This version, by Aaron
