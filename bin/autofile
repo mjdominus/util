@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+use Text::ParseWords qw(shellwords);
+
+my $default_rules = $ENV{AUTOFILE_RULES} // $ENV{HOME} ? "$ENV{HOME}/.autofile" : undef;
+
+%opt = (t => undef, n => 0, v => 0, d => 'd', r => $default_rules);
+getopts('d:nr:t:v', \%opt) or usage();
+my $seq = shift || "them";
+
+die unless defined $opt{d};
+# -d   name default folder (default: +d)
+# -n   say what would be done, but don't do it
+# -r   where to read the rules from
+# -t   any filings into folders other than the default go to -t instead.
+# -v   verbose mode
+
+usage("No rules file specified and default wasn't available")
+    unless defined $opt{r};
+
+my @todo;
+{
+    open(my($rules), "<", $opt{r})
+        or die "Couldn't open rules file '$opt{r}': $!";
+    while (my $line = <$rules>) {
+        chomp $line;
+        $line =~ s/#.*$//;
+        next unless $line =~ /\S/;
+        push @todo, [ shellwords($line) ];
+    }
+}
+
+for my $task (@todo) {
+  my @fv;
+  my @task = @$task;
+  while (@task > 1) {
+    push @fv, [ splice @task, 0, 2 ];
+  }
+
+  my $target_folder;
+  if (@task) {
+      $target_folder = $opt{t} // $task[0]; # -t overrides explicit target
+  } else {
+      $target_folder = $opt{d};  # default folder
+  }
+
+  for my $fv (@fv) { shell_escape($fv->[1]) }
+  my @args = map "-$_->[0] '$_->[1]'", @fv;
+  my $args = join " -and ", @args;
+  my $res = qx{pick $args 2> /dev/null};
+  $res =~ s/\s+/ /g;
+  print STDERR "## pick $args ==> $res\n" if $opt{v};
+  unless ($res =~ /^0/) {
+      run_command("pick -sequence $seq $res > /dev/null 2>&1 ");
+      my $scan = qq{scan $seq};
+      my $action = qq{refile $seq +$target_folder < /dev/null}; # don't ask questions
+      my $command = $opt{n} ? $scan : "$scan && $action";
+      run_command($command, "$args => +$target_folder");
+  }
+}
+
+run_command("folder");
+
+sub run_command {
+  my ($command, $annotation) = @_;
+  print STDERR "$annotation\n" if $annotation;
+  system($command);
+}
+
+sub shell_escape {
+  for (@_) {
+    s/'/'"'"'/g;
+  }
+}
