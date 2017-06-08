@@ -1,25 +1,35 @@
 #!/usr/bin/perl
 
 use Getopt::Std;
-%opt = (t => undef, n => 0, v => 0, d => 'd');
-getopts('d:nt:v', \%opt) or usage();
+use Text::ParseWords qw(shellwords);
+
+my $default_rules = $ENV{AUTOFILE_RULES} // $ENV{HOME} ? "$ENV{HOME}/.autofile" : undef;
+
+%opt = (t => undef, n => 0, v => 0, d => 'd', r => $default_rules);
+getopts('d:nr:t:v', \%opt) or usage();
 my $seq = shift || "them";
 
-# -n   say what would be done, but don't do it
-# -v   verbose mode
+die unless defined $opt{d};
 # -d   name default folder (default: +d)
+# -n   say what would be done, but don't do it
+# -r   where to read the rules from
 # -t   any filings into folders other than the default go to -t instead.
+# -v   verbose mode
 
-@todo = (["subj", "this"],  # files in +d by default
+usage("No rules file specified and default wasn't available")
+    unless defined $opt{r};
 
-	 # non-default folder
-         ["subj", "library notification", "misc/library"],
-
-	 # AND conditions
-	 ["from", 'paypal@e.paypal.com', "to", 'mjd-corp-paypal.com@plover.com' ],
-
-	 ['to', 'example-staples@plover.com', 'misc/commerce' ],
-    );
+my @todo;
+{
+    open(my($rules), "<", $opt{r})
+        or die "Couldn't open rules file '$opt{r}': $!";
+    while (my $line = <$rules>) {
+        chomp $line;
+        $line =~ s/#.*$//;
+        next unless $line =~ /\S/;
+        push @todo, [ shellwords($line) ];
+    }
+}
 
 for my $task (@todo) {
   my @fv;
@@ -32,8 +42,9 @@ for my $task (@todo) {
   if (@task) {
       $target_folder = $opt{t} // $task[0]; # -t overrides explicit target
   } else {
-      $target_folder = $opt{d};	# default folder
+      $target_folder = $opt{d};  # default folder
   }
+
   for my $fv (@fv) { shell_escape($fv->[1]) }
   my @args = map "-$_->[0] '$_->[1]'", @fv;
   my $args = join " -and ", @args;
@@ -45,7 +56,7 @@ for my $task (@todo) {
       my $scan = qq{scan $seq};
       my $action = qq{refile $seq +$target_folder < /dev/null}; # don't ask questions
       my $command = $opt{n} ? $scan : "$scan && $action";
-      run_command($command, "$args => +$folder");
+      run_command($command, "$args => +$target_folder");
   }
 }
 
