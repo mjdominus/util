@@ -5,21 +5,30 @@ use Getopt::Std;
 
 # -c s  set spot character to s instead of to .
 # -p dot out prefixes only
+# -P dot out entire field if it doesn't match
 # -s dot out space characters also
 # -F auto-field-detection mode
-# -f start,end,start,end,start  field specification
+# -f start,len,start,len,start  field specification
+# -L ls -l mode -- for testing only
 my %opt = (c => '.');
-getopts("Ff:c:ps", \%opt) || usage();
+getopts("LFf:c:Pps", \%opt) || usage();
 
-my @field_spec = (0);
-if ($opt{f} && $opt{F}) {
-    usage("field specified -f is incompatible with auto-field detection -F");
-} elsif ($opt{f}) {
-    @field_spec = split /\,\s*/, $opt{f};
-} elsif ($opt{F}) {
-    usage("auto-field detection -F is not yet implemented");
+my @field_spec;
+{
+    my $f_count = defined($opt{f}) + defined($opt{F}) + defined($opt{L});
+    if ($f_count > 1) {
+	usage("-f, -F, and -L are incompatible");
+    } elsif ($opt{f}) {
+	@field_spec = split /\,\s*/, $opt{f};
+    } elsif ($opt{F}) {
+	usage("auto-field detection -F is not yet implemented");
+    } elsif ($opt{L}) {
+	@field_spec = (0,10 , 11,1 , 13,8 , 22,8 , 31,7 , 39,3 , 43,2 , 46,5 , 52);
+    } else {
+	@field_spec = (0);
+    }
 }
-
+    
 my @prevs;
 while (<>) {
   my @orig_fields = my_split($_);
@@ -43,9 +52,9 @@ sub my_split {
   my @fspec = @field_spec;
   my @out;
   while (@fspec) {
-    my ($start, $end) = splice @fspec, 0, 2;
-    if (defined $end) {
-      push @out, substr($rec, $start, $end-$start);
+    my ($start, $len) = splice @fspec, 0, 2;
+    if (defined $len) {
+      push @out, substr($rec, $start, $len);
     } else {
       push @out, substr($rec, $start);
     }
@@ -56,6 +65,15 @@ sub my_split {
 sub differences {
   my ($cur, $prev) = @_;
   return $cur unless defined $prev;
+
+  # pattern for characters that should be replaced with dots
+  my $repl_pat = $opt{s} ? '.' : '\S';
+
+  if ($opt{P} && $cur eq $prev) {
+      $cur =~ s/$repl_pat/$opt{c}/go;
+      return $cur;
+  }
+
   for my $pos (0 .. min(length($prev), length($cur))-1 ) {
     my $c = \substr($cur, $pos, 1);
     next if !$opt{s} && $$c =~ /\s/;
@@ -71,10 +89,12 @@ sub print_fields {
   my $cur_pos = 0;
   my @fspec = @field_spec;
   while (@fspec) {
-    my ($start, $end) = splice @fspec, 0, 2;
-    print " " x ($cur_pos - $start);
+    my ($start, $len) = splice @fspec, 0, 2;
+    print " " x ($start - $cur_pos);
+    $cur_pos = $start;
     print shift @out;
-    $cur_pos = $end;
+    return if not defined $out[0];
+    $cur_pos += $len;
   }
 }
 
