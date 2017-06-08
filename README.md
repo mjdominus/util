@@ -13,6 +13,11 @@ below.  It guesses which files you might have meant, presents a menu
 to let you select which ones you actually meant, and then opens emacs
 buffers for those files.
 
+`autofile` is a utility for the MH mail system.  It scans the current
+folder and applies a set of rules and actions to the mail it finds,
+reflining all the messages mathing certain patterns into certain
+target folders.
+
 `copy-if-changed` doesn't work yet. Don't use it.
 
 `count` generates a report of the unique lines in the input, sorted by
