@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+%opt = (n => 0, v => 0);
+getopts('nv', \%opt) or usage();
+my $seq = shift || "them";
+
+@todo = (["subj", "this"],  # files in +d by default
+
+	 # non-default folder
+         ["subj", "library notification", "misc/library"],
+
+	 # AND conditions
+	 ["from", 'paypal@e.paypal.com', "to", 'mjd-corp-paypal.com@plover.com' ],
+
+	 ['to', 'example-staples@plover.com', 'misc/commerce' ],
+    );
+
+for my $task (@todo) {
+  my @fv;
+  my @task = @$task;
+  while (@task > 1) {
+    push @fv, [ splice @task, 0, 2 ];
+  }
+  my ($folder) = @task ? $task[0] : "d";
+  for my $fv (@fv) { shell_escape($fv->[1]) }
+  my @args = map "-$_->[0] '$_->[1]'", @fv;
+  my $args = join " -and ", @args;
+  my $res = qx{pick $args 2> /dev/null};
+  $res =~ s/\s+/ /g;
+  print STDERR "## pick $args ==> $res\n" if $opt{v};
+  unless ($res =~ /^0/) {
+      run_command("pick -sequence $seq $res > /dev/null 2>&1 ");
+      my $scan = qq{scan $seq};
+      my $action = qq{refile $seq +$folder};
+      my $command = $opt{n} ? $scan : "$scan && $action";
+      run_command($command, "$args => +$folder");
+  }
+}
+
+run_command("folder");
+
+sub run_command {
+  my ($command, $annotation) = @_;
+  print STDERR "$annotation\n" if $annotation;
+  system($command);
+}
+
+sub shell_escape {
+  for (@_) {
+    s/'/'"'"'/g;
+  }
+}
