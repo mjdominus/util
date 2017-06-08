@@ -43,7 +43,7 @@ for my $task (@todo) {
   unless ($res =~ /^0/) {
       run_command("pick -sequence $seq $res > /dev/null 2>&1 ");
       my $scan = qq{scan $seq};
-      my $action = qq{refile $seq +$folder};
+      my $action = qq{refile $seq +$target_folder < /dev/null}; # don't ask questions
       my $command = $opt{n} ? $scan : "$scan && $action";
       run_command($command, "$args => +$folder");
   }
