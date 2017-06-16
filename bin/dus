@@ -2,18 +2,21 @@
 use strict;
 
 use Getopt::Std;
-my %opt = (n => 0);
+my %opt = (n => 0, x => 0);
 
-getopts("n", \%opt) or usage();
+getopts("nx", \%opt) or usage();
 
 my $FORMAT = "%12d %s\n";
 
 my %saw;
+my $top_dev;
 
 sub do_item {
   my ($item) = @_;
   return if -l $item;
   my ($dev, $ino, $blocks) = (stat $item)[0,1,12];
+  $top_dev //= $dev;
+  next if $opt{x} && $top_dev != $dev;
   return if $saw{"$dev,$ino"}++;
   my $total_size = $blocks/2;
   if (-d $item) {
