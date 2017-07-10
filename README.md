@@ -74,6 +74,16 @@ any input line to the corresponding local time.
 having to chrid there manually and then chdir back, and may save a
 conceptual step.
 
+`lr` performs rudimentary statistical analysis of its input,
+including, primarily, linear regression.  The input should be two
+columns, of X and Y values, or one column, of Y values (and the X
+values are implied to be 1, 2, 3, etc.).  The command then prints out
+the means, variances, and standard deviations of the inputs, the
+correlation between the two columns, and the slope and intercept of
+the best-fit line through the data.  The `-lr` flag suppresses
+everything but the linear regression results; the `-mean` flag
+suppresses everything but the means, and so forth.
+
 `menupick` is a filter reads a list of items from stdin, prints a menu
 of the items on the terminal, repeatedly prompts the terminal for a
 selection of items, and prints the selected items on stdout when the

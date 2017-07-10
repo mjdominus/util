@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+#
+# Linear regression
+
+my %Opts =
+  (''          => [qw(Xm Ym Xv Yv Xs Ys m b r)],
+   mean        => [qw(Xm Ym)],
+   'm'         => [qw(Xm Ym)],
+   stddev      => [qw(Xs Ys)],
+   's'         => [qw(Xs Ys)],
+   sd          => [qw(Xs Ys)],
+   dist        => [qw(Xm Ym Xs Ys)],
+   line        => [qw(m b)],
+   correlation => [qw(r)],
+   corr        => [qw(r)],
+   r           => [qw(r)],
+   lr          => [qw(m b r)],
+   variance    => [qw(Xv Yv)],
+   var         => [qw(Xv Yv)],
+   v           => [qw(Xv Yv)],
+);
+
+if (@ARGV) {
+  while ($ARGV[0] =~ /^-(\w+)$/) {
+    if ($Opts{$1}) {
+      for my $s (@{$Opts{$1}}) {
+        $V{$s} = 1;
+      }
+    } else {
+      $V{$1} = 1;
+    }
+    shift;
+  }
+} else {
+  $V{$_} = 1 for @{$Opts{""}};
+}
+
+while (<>) {
+  chomp;
+  my ($x, $y) = split;
+  ($x, $y) = ($., $x) if not defined $y;
+  $X += $x;
+  $Y += $y;
+  $X2 += $x*$x;
+  $Y2 += $y*$y;
+  $XY += $x*$y;
+  $N += 1;
+}
+
+my $Xm = $X / $N;
+my $Ym = $Y / $N;
+my $Xv = $X2 / $N - $Xm*$Xm;
+my $Yv = $Y2 / $N - $Ym*$Ym;
+my $Xs = sqrt($Xv);
+my $Ys = sqrt($Yv);
+
+my $m = $X*$X == $N * $X2 ? "Inf" : ($X*$Y/$N - $XY) / ($X*$X/$N - $X2);
+my $b = $m eq "Inf" ? "None" : $Ym - $m * $Xm;
+my $r = $Ys ? $m * $Xs/$Ys : "Inf";
+
+print "Xmean $Xm\n"      if $V{Xm};
+print "Ymean $Ym\n"      if $V{Ym};
+print "Xvariance $Xv\n"  if $V{Xv};
+print "Yvariance $Yv\n"  if $V{Yv};
+print "Xstddev $Xs\n"    if $V{Xs};
+print "Ystddev $Ys\n"    if $V{Ys};
+print "Slope $m\n"       if $V{m};
+print "Intercept $b\n"   if $V{b};
+print "Correlation $r\n" if $V{r};
