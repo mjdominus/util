@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+
+my $prec = 1;
+
+while (<>) {
+  s/^(\d+)/numify($1, $prec)/e;
+  print;
+}
+
+sub numify {
+  my ($n, $prec) = @_;
+  my @prefix = (1_000_000_000 => "G",
+                1_000_000     => "M",
+                1_000         => "k",
+               );
+  for (my $i = 0; $i < @prefix; $i += 2) {
+    if ($n >= $prefix[$i]) {
+      return sprintf "%.*f%s", $prec, $n/$prefix[$i], $prefix[$i+1];
+    }
+  }
+  return $n;
+}
