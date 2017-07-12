@@ -106,9 +106,9 @@ prompting is over.  For example: `emacs $(ls | menupick)`.
     page.
 
 `numfilter` copies standard input to standard output, but lines that
-begin with a number are reformatted.  At present the only available
-reformatting converts 1234 to "1.2k", 1234567 to "1.2M", and
-1234567890 to "1.2G".
+begin with a number are reformatted.  Use `-f` to select which
+formatter is used.  The default converts `1234` to `1.2k` and
+similarly.  Use `-b` to use powers of 2 instead of powers of 10.
 
 `pgrep` is an implementation of `grep` in Perl that uses Perl regular
 expressions, implements a couple of features I use a lot, and
