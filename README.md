@@ -105,6 +105,11 @@ prompting is over.  For example: `emacs $(ls | menupick)`.
     to the next page of the menu, and `k` or `p` move to the previous
     page.
 
+`numfilter` copies standard input to standard output, but lines that
+begin with a number are reformatted.  Use `-f` to select which
+formatter is used.  The default converts `1234` to `1.2k` and
+similarly.  Use `-b` to use powers of 2 instead of powers of 10.
+
 `pgrep` is an implementation of `grep` in Perl that uses Perl regular
 expressions, implements a couple of features I use a lot, and
 eliminates a vast number of features I never use.

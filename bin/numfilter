@@ -1,0 +1,59 @@
+#!/usr/bin/perl
+
+use strict;
+use Getopt::Std;
+my %opt = (p => 1,
+           f => 'default',
+           b => 0,
+    );
+getopts("p:f:b", \%opt);
+           
+my $prec = $opt{p};
+my $formatter = $opt{f};
+{ no strict 'refs';
+  defined(&{"format_$formatter"}) or die "Unknown formatter '$formatter'\n";
+  *formatter = \&{"format_$formatter"};
+}
+
+while (<>) {
+  s/^(\d+)/formatter($1, \%opt)/e;
+  print;
+}
+
+sub format_default { numify(@_) }
+
+sub numify {
+  my ($n, $opt) = @_;
+  my $base = $opt->{b} ? 1024 : 1000;
+  my $prec = $opt->{p};
+  my @prefix = ($base**4 , "T",
+                $base**3 , "G",                
+                $base**2 , "M",
+                $base    , "k",
+               );
+  for (my $i = 0; $i < @prefix; $i += 2) {
+    if ($n >= $prefix[$i]) {
+      return sprintf "%.*f%s", $prec, $n/$prefix[$i], $prefix[$i+1];
+    }
+  }
+  return $n;
+}
+
+sub format_diskblocks {
+    my ($n, $opt) = @_;
+    numify($n * 1024, { %opt, b => 1 });
+}
+
+sub usage {
+    print STDERR qq{usage: numfilter [-b] [-p precision]  [-f formatter]
+
+    -b  use binary mode (1024 = 1k etc.)
+        (default: decimal mode (1000 = 1k etc.)
+
+    -p precision  precision of fractions (default 1 decimal place)
+
+    -f formatter-name  name of formatter to use (default: "default")
+        available formatters: default diskblocks
+};
+    exit 2;
+}
