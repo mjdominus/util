@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+
+my ($cur_month) = (localtime)[4] + 1;
+my ($cur_year)  = (localtime)[5] + 1900;
+
+my ($m, $y);
+if (@ARGV == 0) {
+    ($m, $y) = ($cur_month, $cur_year);
+} elsif (@ARGV == 1) {
+    if ($ARGV[0] >= 1 && $ARGV[0] <= 12) {
+        ($m, $y) = ($ARGV[0], $cur_year);
+    } else {
+        print STDERR "Month '$ARGV[0]' is out of range (1–12)\n";
+        usage();
+    }
+} elsif (@ARGV == 2) {
+    ($m, $y) = @ARGV;
+} else {
+    usage();
+}
+
+my @out;
+for my $off (-1, 0, 1) {
+  my ($mo, $yo) = add_month($m, $y, $off);
+  chomp(my @cur_cal = qx{cal -h $mo $yo});
+  fix_lines(@cur_cal);
+  append_lines(\@out, \@cur_cal, $off > -1 ? "   " : "" );
+}
+
+print join "\n", @out, "";
+
+# make all the lines the same length
+sub fix_lines {
+  my ($first, @lines) = @_;
+  my $max = length $first;
+  $max = length($_) > $max ? length($_) : $max for @lines;
+  # Modify in place
+  for (@_) { $_ .= (" " x ($max - length($_))) }
+}
+
+# appeand all the lines in @b to the corresponding lines in @a
+sub append_lines {
+  my ($a, $b, $suf) = @_;
+  $suf //= "";
+  # If @a is too short, add some lines to the end
+  for my $i (@$a .. $#$b) {
+    $a->[$i] = " " x length($a->[0]);
+  }
+
+  # If @b is too short, add some lines to the end
+  for my $i (@$b .. $#$a) {
+    $b->[$i] = " " x length($b->[0]);
+  }
+
+  for my $i (0 .. $#$a) {
+    $a->[$i] .= $suf . $b->[$i];
+  }
+}
+
+sub add_month {
+  my ($m, $y, $off) = @_;
+  $m += $off;
+  while ($m < 1) {
+    $m += 12; $y--;
+  }
+  while ($m > 12) {
+    $m -= 12; $y++;
+  }
+  return ($m, $y);
+}
+
+sub usage {
+    print STDERR "Usage: mycal [ month [ year ] ]\n";
+    exit 2;
+}
