@@ -147,6 +147,11 @@ longest.
 by erasing the parts of each line that match the previous line.  Try
 `ls -l | spot` to see what it does.
 
+`stopafter 12 command args...` runs the specified command with the
+specified args, but sets an alarm clock to go off after 12 seconds,
+which will interrupt the process (unless the command reschedules the
+alarm or handles or ignores the alarm signal.)
+
 `stouch` adjusts the last-modified dates on a set of files so that
 they appear to have been written in the order given on the command
 line.  This is useful for dealing with stupid photo gallery programs

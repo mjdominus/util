@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+my ($limit, $command, @args) = @ARGV;
+$SIG{ALARM} = 'DEFAULT';
+alarm $limit;
+exec $command, @args;
+die "Couldn't run '$command': $!";
