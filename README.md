@@ -157,6 +157,11 @@ they appear to have been written in the order given on the command
 line.  This is useful for dealing with stupid photo gallery programs
 that insist on displaying files in chronological order.
 
+`suf` removes the suffix of a filename and replaces it with a
+different suffix.  For example, `mv $i $(suf $i .jpg)` moves `img.gif`
+to `img.jpg`.  People usually do this with `basename` but `suf` is
+shorter and easier.
+
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
 

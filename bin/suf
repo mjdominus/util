@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+#
+# Usage: suf FILENAME suffix
+#
+# If filename ends with a suffix, the suffix is replaced with the given suffix
+# otheriwse, the given suffix is appended
+#
+# For example:
+#   suf foo.bar baz    => foo.baz
+#   suf foo baz        => foo.baz
+
+@ARGV == 2 or @ARGV == 1 or usage();
+my ($file, $suf) = @ARGV;
+$file =~ s#\.[^./]*$##;
+
+if (defined $suf) {
+  print "$file.$suf\n";
+} else {
+  print "$file\n";
+}
+
+sub usage {
+  print STDERR "Usage: suf filename [newsuffix]\n";
+  exit 1;
+}
