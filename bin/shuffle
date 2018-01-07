@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+@a = <>;
+while (@a) {
+        push @b, splice @a, rand(@a), 1;
+}
+print @b;
