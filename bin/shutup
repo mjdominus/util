@@ -1,0 +1,4 @@
+#!/bin/bash
+
+exec > /dev/null 2> /dev/null
+exec "$@"

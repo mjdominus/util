@@ -129,6 +129,12 @@ Crane](http://aaroncrane.co.uk/2008/07/runN/), has a better interface
 than [my original
 implementation](http://blog.plover.com/prog/runN.html).
 
+`shutup command args...` runs the comand with its standard output and
+standard error directed to `/dev/null`.  If the command wants to
+communicate with the user, it must do so by another method.  `shutup`
+does _not_ detach the terminal, so the subcommand is free to redirect
+its output to `/dev/tty` if it likes
+
 `sort-natural` sorts its input lines like `sort`, but arranges to sort
 the numeric parts of the lines numerically. For example, 
 
