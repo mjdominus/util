@@ -1,4 +1,25 @@
 #!/bin/bash
+#
+# You jackass, you wrote this in shell again!!!
+#
+# Rewrite in Python
 
-exec > /dev/null 2> /dev/null
+function usage {
+    echo "Usage: $0 [-a] command args..." 1>&2
+    exit 2
+}
+
+opt_ALL=false
+case $1 in
+     -a ) opt_ALL=true ;;
+     -* ) usage ;;
+esac          
+         
+if $opt_ALL; then
+    shift
+    exec > /dev/null 2> /dev/null
+else
+    exec             2> /dev/null
+fi
+    
 exec "$@"
