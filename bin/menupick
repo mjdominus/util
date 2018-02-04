@@ -98,3 +98,16 @@ sub print_set {
     my ($out) = shift;
     print $out "@_\n";
 }
+
+sub usage {
+    print STDERR "Usage: menupick [-1] [-n pagesize]
+    Read items from standard input, prompt terminal
+    for a selection of them, print selected items
+    on standard output.
+
+    -1: if there is only one item, select it without prompting
+    -n pagesize: maximum number of items on each page of the menu
+                 (default 30)
+";
+    exit 2;
+}
