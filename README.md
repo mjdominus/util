@@ -27,6 +27,15 @@ frequency of occurrence.
 `+12` as “plus 12 days”, and prints the resulting date in the same
 format.
 
+`disp` is a triviality.  My `.screenlayout` directory contains a
+number of shell scripts, saved for me by `arandr`, for reconfiguring
+the screen dimensions to match various monitor setups.  I use `disp 1`
+when I want to use the laptop screen only, `work-vertical` when my
+work monitor is in its vertical configuration, and
+`work-vertical-stand` when it is also on a stand.  The `disp` command
+finds one of these and runs it; it also supports a `-c` flag so I can
+use it as the backend of a shell programmable completion function.
+
 `dus` is like the standard `du` program, but lists the sizes of files
 as well as the totals for each directory.  `dus -n` sorts the output
 by size.

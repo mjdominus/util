@@ -1,0 +1,70 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+# print STDERR "disp ", map("($_)", @ARGV), "\n";
+my %opt;
+getopts("Ad:c:h?", \%opt) or usage();
+# print join(" ", %opt), "\n";
+my $DIR = $opt{d} || "$ENV{HOME}/.screenlayout";
+
+usage() if $opt{h} || $opt{'?'};
+
+if (defined $opt{c}) {
+    complete($opt{c});
+    exit 0;
+}
+
+my $disp = shift // usage();
+my $file = "$DIR/$disp.sh";
+unless (-e $file) {
+  usage("No such screenlayout '$disp'");
+}
+system("/bin/sh", $file) == 0 || die "Couldn't run: $!";
+fork || exec "reset-plasma";
+exit;
+
+sub usage {
+  my $msg = shift // "Usage: disp [-A] [-c prefix] [-d dir] display-name";
+  print STDERR $msg, "\n\n";
+  print STDERR "Valid displays:\n";
+  print_display_usage();
+  exit 2;
+}
+
+sub complete {
+    my ($prefix) = @_;
+    my @displays = displays();
+    print join "\n", grep(/^\Q$prefix/, displays()), "";
+}
+
+sub displays {
+  return display_list(symlinks => 0);
+}
+
+sub print_display_usage {
+  my @displays = display_list(symlinks => 1);
+  for my $disp (sort { $a->[0] cmp $b->[0] } @displays) {
+    if (defined($disp->[1])) {
+      next if $opt{A};
+      print STDERR "\t$disp->[0]   (alias for $disp->[1])\n";
+    } else {
+      print STDERR "\t$disp->[0]\n";
+    }
+  }
+}
+
+sub display_list {
+  my %opt = @_;
+  my @files = grep  m#.*/[\w-]+.sh$#, glob("$DIR/*.sh");
+  if ($opt{symlinks}) {
+    @files = map { -l $_ ? [ strip($_), readlink $_ ] : [ strip($_) ] } @files;
+  } else {
+    @files = map strip($_), grep ! -l $_, @files;
+  }
+  return @files;
+}
+
+sub strip {
+  my ($file) = @_;
+  return $file =~ m#/([\w-]+).sh#;
+}
