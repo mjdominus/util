@@ -128,6 +128,24 @@ sub usage {
     -1: if there is only one item, select it without prompting
     -n pagesize: maximum number of items on each page of the menu
                  (default 30)
+Commands:
+    Each line of input is a series of words of the form
+        N   !N   N-N  *
+    where N is any number.  An empty line, or a line ending in '!',
+    signals the end of the input.
+
+    N   selects the specified item.
+    !N  un-selects it.
+    N-N selects the items in the specified range.
+    *   selects every item on the current page
+    n   goes to the next page
+    p   goes to the previous page
+
+    After changing pages, or if the line contains '??' anywhere, a
+    menu is printed listing the items on the current page, showing
+    which, if any, are selected.  Otherwise, if the line contains '?'
+    anywhere, the indices of all currently-selected items are listed.
+
 ";
     exit 2;
 }
