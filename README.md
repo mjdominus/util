@@ -102,12 +102,13 @@ prompting is over.  For example: `emacs $(ls | menupick)`.
     items that are added to the current selection, and numbers with
     prefixed `!` marks, which are removed from the current selection.
     Any number of such items can be entered at once, sepearated by
-    whitespace.
+    whitespace.  Ranges such as '12-23' are allowed.  '*' is an
+    abbreviation for all the items on the current page.
 
     An empty line, or a line that ends with `!`, terminates the
-    prompting.  If an input line ends with `?`, the list of
+    prompting.  If an input line contains a single `?`, the list of
     currently-selected items will be printed before the next prompt;
-    if it ends with `??` the menu will be redisplayed, with selected
+    if it contains `??` the menu will be redisplayed, with selected
     items marked.
 
     If the number of items is large, lines containing `j` or `n` move
