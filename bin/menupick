@@ -26,8 +26,10 @@ if ($opt->{1} && @item == 1) {
 
 sub show_menu {
   my ($page, $set) = @_;
+  $set //= [];
   my %sh = map { $_ => 1 } @$set;
-  for my $i ($page*$pagesize .. ($page+1)*$pagesize-1) {
+  my ($start, $end) = page_bounds($page);
+  for my $i ($start .. $end) {
     last unless defined $item[$i];
     printf $ttyout "%2d. %s %s\n", $i, $sh{$i} ? "*" : " ", $item[$i];
   }
@@ -35,22 +37,31 @@ sub show_menu {
     print $ttyout ($page == $last_page ? "--END--\n" : "--more--\n");
   }
 }
-show_menu(0);
+
+sub page_bounds {
+    my ($page) = @_;
+    my $first = $page*$pagesize;
+    my $last = ($page+1)*$pagesize-1;
+    $last = $#item if $last > $#item;
+    return ($first, $last);
+}
 
 my $page = 0;
 my @set = ();
+
+show_menu(0);
 while (1) {
   my $in = prompt($ttyin, $ttyout);
   my $newpage;
   chomp $in;
   last unless $in =~ /\S/;
-  my $quit = $in =~ s/!\s*$//;
-  my $show = $in =~ s/\?{2,}\s*$//;
-  if ($in =~ /^\s*\?\s*$/) {
+  my $quit = $in =~ s/[!q]\s*$//;
+  my $show = $in =~ s/\?{2,}\s*$//;  # ??
+  if ($in =~ /^\s*\?\s*$/) {         # ?
       print_set($ttyout, @set);
       next;
-  } elsif ($in =~ /^\s*\*\s*$/) {
-      $in = join(" ", 0 .. $pagesize-1);
+  } elsif ($in =~ /^\s*\*\s*$/) {    # *
+      $in = sprintf("%d-%d", page_bounds($page));
   } elsif ($in =~ /[kKpP]/) {
       $newpage = $page - 1;
       $newpage = 0 if $newpage < 0;
@@ -81,13 +92,13 @@ sub modify {
   my %set;
   @set{@$set} = (1) x @$set; # URGH
   #mod =~ tr/,/ /;
-  my @items = split /\s+/, $mod;
-  for my $item (@items) {
-    if ($item =~ /^\d+$/) {
-      $set{$item} = 1;
-    } elsif ($item =~ /^ (\d+) - (\d+) $/x) {
+  my @words = split /\s+/, $mod;
+  for my $word (@words) {
+    if ($word =~ /^\d+$/) {
+      $set{$word} = 1;
+    } elsif ($word =~ /^ (\d+) - (\d+) $/x) {
       for ($1 .. $2) { $set{$_} = 1 }
-    } elsif ($item =~ /^ [-!] (\d+) $/x) {
+    } elsif ($word =~ /^ [-!] (\d+) $/x) {
       delete $set{$1};
     }
   }
