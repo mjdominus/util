@@ -51,29 +51,38 @@ my @set = ();
 
 show_menu(0);
 while (1) {
-  my $in = prompt($ttyin, $ttyout);
+  my $commands = prompt($ttyin, $ttyout);
   my $newpage;
-  chomp $in;
-  last unless $in =~ /\S/;
-  my $quit = $in =~ s/[!q]\s*$//;
-  my $show = $in =~ s/\?{2,}\s*$//;  # ??
-  if ($in =~ /^\s*\?\s*$/) {         # ?
-      print_set($ttyout, @set);
-      next;
-  } elsif ($in =~ /^\s*\*\s*$/) {    # *
-      $in = sprintf("%d-%d", page_bounds($page));
-  } elsif ($in =~ /[kKpP]/) {
-      $newpage = $page - 1;
-      $newpage = 0 if $newpage < 0;
-      $show++;
-  } elsif ($in =~ /[JjnN]/) {
-      $newpage = $page + 1;
-      $newpage = $last_page if $newpage > $last_page;
-      $show++;
+  last unless $commands =~ /\S/;
+  chomp $commands;
+  my $quit = $commands =~ s/[!q]\s*$//;
+  $commands =~ s/(\?+)$/ $1/;
+  my $show = "";
+  for my $cmd (split /[,\s]+/, $commands) {
+      $show = 'long' if $cmd =~ s/\?{2,}//;  # ??
+      $show = 'short' if $cmd =~ s/\?//;     # ?
+      next unless $cmd =~ /\S/;
+      if ($cmd eq "*") {                     # *
+          modify(sprintf("%d-%d", page_bounds($page)), $page, \@set);
+      } elsif ($cmd =~ /[kKpP]/) {
+          $newpage = $page - 1;
+          $newpage = 0 if $newpage < 0;
+          $show = 'long';
+      } elsif ($cmd =~ /[JjnN]/) {
+          $newpage = $page + 1;
+          $newpage = $last_page if $newpage > $last_page;
+          $show = 'long';
+      } else {                  # 12, !12, -12, 12-17
+          # Run it up the flagpole...
+          modify($cmd, $page, \@set);
+      }
+      $page = $newpage if defined $newpage;
   }
-  modify($in, $page, \@set);
-  $page = $newpage if defined $newpage;
-  show_menu($page, \@set) if $show;
+  if ($show eq "short") {
+      print_set($ttyout, @set);
+  } elsif ($show eq "long") {
+      show_menu($page, \@set);
+  }
   last if $quit;
 }
 
