@@ -38,6 +38,7 @@ if (@ARGV) {
 while (<>) {
   chomp;
   my ($x, $y) = split;
+  next if not defined $x;
   ($x, $y) = ($., $x) if not defined $y;
   $X += $x;
   $Y += $y;
