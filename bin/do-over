@@ -1,0 +1,16 @@
+#!/usr/bin/perl
+
+use Time::HiRes qw(time);
+
+print STDERR "Hit <enter> to start\n";
+while (1) {
+      my $x = <STDIN>;
+      last unless $x;
+      print STDERR scalar(localtime()), "\n";
+      my $start = time();
+      print STDERR "running @ARGV\n";
+      system(@ARGV);
+      my $elapsed = time() - $start;
+      printf STDERR "Job completed in %.1fs\n", $elapsed;
+      print STDERR "Hit enter to restart\n"; 
+}     
