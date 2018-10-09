@@ -3,20 +3,30 @@
 use strict;
 use Getopt::Std;
 my %opt = (p => 1,
-           f => 'default',
+           F => 'default',
            b => 0,
+           f => 1,
     );
-getopts("p:f:b", \%opt);
-           
+getopts("p:f:bF:", \%opt);
+
 my $prec = $opt{p};
-my $formatter = $opt{f};
+my $formatter = $opt{F};
 { no strict 'refs';
   defined(&{"format_$formatter"}) or die "Unknown formatter '$formatter'\n";
   *formatter = \&{"format_$formatter"};
 }
+my $fieldno = $opt{f} == 0 ? "ALL" :
+              $opt{f} >= 1 ? $opt{f} - 1 
+                           : $opt{f};
 
 while (<>) {
-  s/^(\d+)/formatter($1, \%opt)/e;
+  if ($fieldno eq "ALL") {
+    s/\b(\d+)\b/formatter($1, \%opt)/eg;
+  } else {
+    my @F = split /(\s+)/;
+    $F[$fieldno * 2] =~ s/\A(\d+)\z/formatter($1, \%opt)/eg;
+    $_ = join("", @F);
+  }
   print;
 }
 
@@ -52,7 +62,9 @@ sub usage {
 
     -p precision  precision of fractions (default 1 decimal place)
 
-    -f formatter-name  name of formatter to use (default: "default")
+    -f n    which field to operate on (default: 1; negative OK; 0 means do *all* numbers)
+
+    -F formatter-name  name of formatter to use (default: "default")
         available formatters: default diskblocks
 };
     exit 2;
