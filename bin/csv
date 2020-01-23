@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+
+import argparse
+import csv
+import re
+import sys
+
+argparser = argparse.ArgumentParser(description='Extract information from CSV file')
+argparser.add_argument('input_files', nargs="*", help='an integer for the accumulator')
+argparser.add_argument('--no-header', dest='header', action='store_false', help='')
+argparser.add_argument('--header', dest='header', action='store_true', default=True, help='')
+argparser.add_argument('--fields', '-F', help='')
+argparser.add_argument('--comma', default=",")
+argparser.add_argument('--newline', default="\n")
+
+args = None
+
+def do_file(fh):
+    r = csv.reader(fh)
+    field_indices = None
+
+
+    if args.fields is None:
+        for rec in r:
+            print(args.comma.join(rec), end=args.newline)
+    else:
+        if args.header:
+            field_names = r.__next__()
+#            print("field names:", field_names, file=sys.stderr)
+            field_indices = [ field_names.index(f) for f in re.split(r',\s*', args.fields) ]
+        else:
+            field_indices = [ int(f) for f in re.split(r',\s*', args.fields) ]
+        for rec in r:
+            print(args.comma.join([rec[i] for i in field_indices]), end=args.newline)
+
+
+if __name__ == '__main__':
+    args = argparser.parse_args()
+    print(args)
+    if len(args.input_files) == 0:
+        do_file(sys.stdin)
+    else:
+        for f in args.input_files:
+            with open(f, "r") as fh:
+                do_file(fh)
+    exit(0)
