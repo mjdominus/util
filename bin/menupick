@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
 use Getopt::Std;
-my $opt = { 1 => 0, n => 30 };
-getopts('1n:', $opt) or usage();
+my $opt = { 1 => 0, n => 30, "q" => 0 };
+getopts('1qn:', $opt) or usage();
 my $pagesize = $opt->{n};
 
 chomp(my @item = <>);
@@ -77,6 +77,7 @@ while (1) {
           modify($cmd, $page, \@set);
       }
       $page = $newpage if defined $newpage;
+      $quit = 1, last if $opt->{q} and @set;
   }
   if ($show eq "short") {
       print_set($ttyout, @set);
@@ -128,6 +129,8 @@ sub usage {
     -1: if there is only one item, select it without prompting
     -n pagesize: maximum number of items on each page of the menu
                  (default 30)
+    -q: quick mode: exit as soon as at least one item has been selected
+
 Commands:
     Each line of input is a series of words of the form
         N   !N   N-N  *
