@@ -1,46 +1,141 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env python3
 
-use Getopt::Std;
-use Linux::Inotify;
-use Time::HiRes qw(time sleep);
-use Data::Dumper;
+import argparse
+import inotify.adapters
+from pathlib import Path
+from time import time
+import subprocess
+import sys
 
-my $default_z = 1;
-my %opt = (x => 0, z => $default_z, 1 => 0);
-usage() unless getopts("xz:1", \%opt);
-my ($file, $cmd, @args) = @ARGV;
-defined($cmd) or usage();
+class MyArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def double_hyphen_split(self, args):
+        before = []
+        after = []
+        if args[0] == "--":
+            # Special case because slice notation behaves differently
+            # for i=-1
+            return [], args[1:]
+
+        for i in range(1, len(args)):
+            if args[i] == "--":
+                return args[: i], args[ i+1 : ]
+
+        self.exit(status=2, message='Argument format requires "--" somewhere\n')
+
+    def usage_message(self):
+        return """Usage: ifchanged [-s] [-d] [-v] [-z secs] [-x1] files... -- command args...
+
+    Run command whenever one or more of the files changes
+      (Directories OK too)
+    Checks and runs the command at most once per second; use -z to change
+
+    -d means file deletions are also considered 'changes'
+    Exit after the first execution of the command, if -1 is given
+    Exit if the command runs unsuccessfully, if -x is given
+    Before running the command, print what will be run, if -v is given
+
+    -s enables escape substitution:
+      If a command argument contains '%c', the argument is repeated, once for each changed file, with the '%c' replaced by the name of the file
+    """
+
+    def print_usage(self, file):
+        if file is None:
+            file = sys.stdout
+        print(self.usage_message(), file=file)
+
+    def parse_args(self, args=None, namespace=None):
+        if args is None:
+            args = list(sys.argv[1:])
+        before, after = self.double_hyphen_split(args)
+        parsed_args = super().parse_args(args=before, namespace=namespace)
+        if len(after) == 0:
+            self.exit(status=2, message='No command given after "--"\n')
+
+        parsed_args.command = after[0]
+        parsed_args.command_args = after[1:]
+
+        return parsed_args
 
 
-my $notifier = Linux::Inotify->new();
-my $mask = Linux::Inotify::MODIFY;
-my $watch = $notifier->add_watch($file, $mask);
+parser = MyArgumentParser(description='Watch files and print a notice when one changes')
+parser.add_argument('--substitute', '-s', action='store_true')
+parser.add_argument('--verbose', '-v', action='store_true')
+parser.add_argument('--sleep-time', '-z', type=int, default=1)
+parser.add_argument('--deletes', '-d', action='store_true', help='Also wake up when files are deleted')
+parser.add_argument('-x', action='store_true')
+parser.add_argument('-1', dest='one', action='store_true')
+parser.add_argument('files', nargs='*')
 
-my $last_notify = 0;
-while (1) {
-  my @events = $notifier->read;
-  my $elapsed = time() - $last_notify;
-  my $sleep = $opt{z} - $elapsed;
-  if ($sleep > 0) {
-    sleep $sleep;
-    push @events, $notifier->read
-  }
-#  print Data::Dumper::Dumper("event", $_) for @events;
-  unless (system($cmd, @args) == 0) {
-    warn("command failed $?");
-    exit 3 if $opt{x};
-  }
-  $last_notify = time();
-}
+def interesting_events(events, deletes_too):
+    interesting = []
+    for ev in events:
+        ev_types = ev[1]
+        if 'IN_MODIFY'      in ev_types or \
+           'IN_CLOSE_WRITE' in ev_types or \
+           'IN_DELETE'      in ev_types and deletes_too:
+             interesting.append(ev)
+    return interesting
 
+def changed_files(events):
+    cf = set()
+    for ev in events:
+        p1, p2 = ev[2:4]
+        if p2 == "":
+            dir = '.'
+            file = p1
+        else:
+            dir = p1
+            file = p2
+        cf.add(Path(dir) / file)
+    return cf
 
-sub usage {
-  print STDERR qq{Usage: ifchanged [-z secs] [-x1] file command args...
+if __name__ == '__main__':
+    # first remove everything after the "--"
+    # so that argparse can't get to it first.
+    # (argparse handles "--" but not in the way I need it to.)
+#    argv = sys.argv[1:] if len(sys.argv) > 1 else ["-x", "-z3", "foo", "--", "bar"]
+    args = parser.parse_args()
 
-    Run command whenever the file changes
-    Checks after 'secs' secs, $default_z by default
-    Exit after the first execution of the command if -1 is given
-    Exit if the command runs unsuccessfully if -x is given
-};
-  exit 2;
-}
+#    print(args)
+
+    i = inotify.adapters.Inotify()
+    for file in args.files:
+        i.add_watch(file)
+
+    while True:
+        events = interesting_events(i.event_gen(yield_nones=False,
+                                                timeout_s=args.sleep_time),
+                                    deletes_too=args.deletes)
+        if len(events) == 0:
+            continue
+
+        files = list(changed_files(events))
+
+        cmd = [args.command]
+        if args.substitute:
+            for cmd_arg in args.command_args:
+                if "%c" in cmd_arg:
+                    for f in files:
+                        cmd.append(cmd_arg.replace("%c", str(f)))
+                else:
+                    cmd.append(cmd_arg)
+        else:
+                cmd += args.command_args
+        if args.verbose:
+            print(int(time()), cmd)
+
+        res = subprocess.run(cmd)
+        if res.returncode != 0:
+            if res.returncode < 0:
+                print(f"command killed by signal {-res.returncode}",
+                      file=sys.stderr)
+            else:
+                print(f"command exited with status {res.returncode}",
+                      file=sys.stderr)
+            if args.x:
+                exit(res.returncode)
+        if args.one:
+            exit(res.returncode)
