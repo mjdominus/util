@@ -101,22 +101,22 @@ of the items on the terminal, repeatedly prompts the terminal for a
 selection of items, and prints the selected items on stdout when the
 prompting is over.  For example: `emacs $(ls | menupick)`.
 
->     Responses to the prompt are a series of numbers, which identify
->     items that are added to the current selection, and numbers with
->     prefixed `!` marks, which are removed from the current selection.
->     Any number of such items can be entered at once, sepearated by
->     whitespace.  Ranges such as '12-23' are allowed.  '*' is an
->     abbreviation for all the items on the current page.
-> 
->     An empty line, or a line that ends with `!`, terminates the
->     prompting.  If an input line contains a single `?`, the list of
->     currently-selected items will be printed before the next prompt;
->     if it contains `??` the menu will be redisplayed, with selected
->     items marked.
-> 
->     If the number of items is large, lines containing `j` or `n` move
->     to the next page of the menu, and `k` or `p` move to the previous
->     page.
+> Responses to the prompt are a series of numbers, which identify
+> items that are added to the current selection, and numbers with
+> prefixed `!` marks, which are removed from the current selection.
+> Any number of such items can be entered at once, sepearated by
+> whitespace.  Ranges such as '12-23' are allowed.  '*' is an
+> abbreviation for all the items on the current page.
+>
+> An empty line, or a line that ends with `!`, terminates the
+> prompting.  If an input line contains a single `?`, the list of
+> currently-selected items will be printed before the next prompt;
+> if it contains `??` the menu will be redisplayed, with selected
+> items marked.
+>
+> If the number of items is large, lines containing `j` or `n` move
+> to the next page of the menu, and `k` or `p` move to the previous
+> page.
 
 `numfilter` copies standard input to standard output, but one or more
 of the fields are examines for numerals, which are then reformatted to
