@@ -9,7 +9,7 @@ my $freq = shift || usage();
 
 while (1) {
   my $start = time();
-  warn "Starting at " . localtime($start) . "\n" if $opt_v;
+  warn sprintf "[%s] Starting.\n", scalar(localtime) if $opt_v;
   system(@ARGV);
   my $rc = $?;
   if ($rc & 255) {
@@ -20,7 +20,7 @@ while (1) {
     exit 1;
   }
   my $elapsed = time() - $start;
-  warn "Completed after $elapsed sec.\n" if $opt_v;
+  warn sprintf "[%s] Completed after %.1f sec.\n", scalar(localtime), $elapsed if $opt_v;
   my $zz = $opt_s ? $freq - $elapsed : $freq;
   sleep $zz if $zz > 0;
 }
