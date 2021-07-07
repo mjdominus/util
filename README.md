@@ -39,6 +39,10 @@ use it as the backend of a shell programmable completion function.
 `do-over` is a triviality: it runs a certain command every time you
 hit enter.  I don't know why I like it so much.
 
+`dt` is for managing the names of KDE desktops.  The System Settings
+widget for doing this is clumsy.  Basic use is `dt [ -n number ] new-name`.
+If `-n` is omitted, it sets the name of the current desktop.
+
 `dus` is like the standard `du` program, but lists the sizes of files
 as well as the totals for each directory.  `dus -n` sorts the output
 by size.

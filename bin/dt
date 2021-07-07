@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+#
+# Program for querying and setting desktop names
+#
+#
+# dt : print table of names and ID numbers
+# dt --current : print name and ID of current desktop
+# dt [--id ID] newname : set name of specified desktop (default current)
+
+from argparse import ArgumentParser
+import re
+import subprocess
+import sys
+
+def main(args):
+    if args.newname is None:
+        if args.current:
+            print(currentDesktopUUID())
+        else:
+            for dt in desktopInfo():
+                print(f'{dt["number"] :2} {dt["uuid"]} {dt["name"]}')
+    else:
+        if args.id is not None:
+            uuid = args.id
+        elif args.number is not None:
+            uuid = uuidForDesktopNumber(int(args.number))
+        else:
+            uuid = currentDesktopUUID()
+        setDesktopName(uuid, args.newname)
+
+# returns bytes, not string
+def query(method, *args, literal=False):
+    literal = ["--literal"] if literal else []
+    result = subprocess.run(["qdbus", *literal,
+                             "org.kde.KWin",
+                             "/VirtualDesktopManager",
+                             f"org.kde.KWin.VirtualDesktopManager.{method}",
+                             *args ],
+                            stdout=subprocess.PIPE,
+                            check=True,
+                            encoding='utf8'
+                            )
+    return result.stdout.rstrip()
+
+def uuidForDesktopNumber(n):
+    info = desktopInfo()
+    for dt in info:
+        if dt["number"] == n:
+            return dt["uuid"]
+    return None
+
+# qdbus --literal org.kde.KWin /VirtualDesktopManager org.kde.KWin.VirtualDesktopManager.desktops
+# [Variant: [Argument: a(uss) {[Argument: (uss) 0, "9fa10a84-c362-4493-ab6f-7f8664e14c37", "Work"], [Argument: (uss) 1, "12e8a0f4-07b2-4a18-b575-39c270e1967e", "Bar"], [Argument: (uss) 2, "26e9573a-901a-41ad-b1cf-38375b05596d", "PR 1842"], [Argument: (uss) 3, "22be6ee4-a3ef-4670-b40e-6a9f7368ef69", "PR 1876"], [Argument: (uss) 4, "f026ccff-225b-4859-8141-74fc3b6aa414", "PR 1873"], [Argument: (uss) 5, "9cbbbb87-d4ce-43aa-83e2-8bab53e338d2", "Play"], [Argument: (uss) 6, "6491ac64-af75-4713-ab05-0f2130c688ef", "Home"]}]]
+# Note that if the desktop name contains double quotes,
+# the output may be parsed incorrectly.
+# We do the best we can here
+def desktopInfo():
+    info = query("desktops", literal=True)
+    res = re.findall(r'(\d+), "([0-9a-f-]+)", "(.*?)"\]', info)
+    return [ { "number": int(a), "uuid": b, "name": c }
+             for a, b, c in res ]
+
+# qdbus org.kde.KWin /VirtualDesktopManager org.kde.KWin.VirtualDesktopManager.current
+# 12e8a0f4-07b2-4a18-b575-39c270e1967e
+def currentDesktopUUID():
+    return query("current")
+
+# qdbus org.kde.KWin /VirtualDesktopManager org.kde.KWin.VirtualDesktopManager.setDesktopName 12e8a0f4-07b2-4a18-b575-39c270e1967e blarf
+def setDesktopName(uuid, new_name):
+    query("setDesktopName", uuid, new_name)
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description="Display or set names of KDE desktops; with no arguments, display all names and IDs")
+    parser.add_argument("--current", "-C", action="store_true", help='display UUID of current desktop')
+    parser.add_argument("--id", "-i", help="UUID of desktop to operate on", metavar="UUID")
+    parser.add_argument("--number", "-n", help="Index number of desktop to operate on")
+    parser.add_argument("newname", nargs="?", help="new name for desktop")
+
+    main(parser.parse_args())
