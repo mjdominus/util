@@ -67,6 +67,8 @@ def currentDesktopUUID():
 
 # qdbus org.kde.KWin /VirtualDesktopManager org.kde.KWin.VirtualDesktopManager.setDesktopName 12e8a0f4-07b2-4a18-b575-39c270e1967e blarf
 def setDesktopName(uuid, new_name):
+    if new_name == '':
+        raise Exception("KDE has a bug with empty desktop names, don't try it")
     query("setDesktopName", uuid, new_name)
 
 if __name__ == '__main__':
