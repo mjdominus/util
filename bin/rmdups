@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+#
+# rmdups
+#
+# remove duplicate files in a directory
+
+from distutils.ccompiler import gen_lib_options
+import hashlib
+import os
+from pathlib import Path
+import re
+import sys
+
+hashcache = {}
+
+def hash_file(path):
+    m = hashlib.sha256()
+    try:
+        m.update(path.read_bytes())
+    except IsADirectoryError:
+        pass
+    return m.hexdigest()
+
+def cache(p, h):
+    global hashcache
+    if h in hashcache:
+        hashcache[h].add(p)
+    else: 
+        hashcache[h] = set([p])
+
+def examine_files_in_dir(dir):
+    global hashcache
+    d = Path(dir)
+    for p in d.iterdir():
+        cache(p, hash_file(p))
+
+def remove_file(f, noaction=False, verbose=False):
+    if noaction or verbose:
+        print("(Not actually) removing file", f, file=sys.stderr)
+    if not noaction:
+        f.unlink()
+
+def remove_duplicates_in_file_group(paths, noaction=False, verbose=False):
+    """These files are all identical.  Figure out
+    which one we want to keep and discard the others
+    
+    First cut: if one is named `foo.bar`, remove the ones named
+    `foo (\d+).bar`
+    """
+    names = [p.name for p in paths]
+    for p in paths:
+        m = re.match(r'(.+) \(\d+\)(\..+)', p.name)
+        if m is not None:
+            base = m.group(1) + m.group(2)
+            if base in names:
+                remove_file(p, noaction=noaction)
+
+def parse_argv(argv):
+    import argparse
+    parser = argparse.ArgumentParser(description="Remove duplicate files from one or more directories")
+    parser.add_argument('directories', type=str, nargs='*')
+    parser.add_argument('--dry-run', '--noaction', '-n', action='store_true')
+    parser.add_argument('--verbose', '-v', action='store_true')
+    return parser.parse_args(argv)
+
+if __name__ == '__main__':
+    args = parse_argv(sys.argv[1:])
+    if len(args.directories) == 0:
+        args.directories = [ "." ]
+    for d in args.directories:
+        examine_files_in_dir(d)
+    for group in hashcache.values():
+        remove_duplicates_in_file_group(group, verbose=args.verbose, noaction=args.dry_run)
