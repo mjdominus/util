@@ -18,6 +18,10 @@ folder and applies a set of rules and actions to the mail it finds,
 reflining all the messages mathing certain patterns into certain
 target folders.
 
+`badge` sets the "badge" in an iTerm2 terminal.
+See [the iTerm2 documentation](https://iterm2.com/documentation-badges.html)
+for details.
+
 `copy-if-changed` doesn't work yet. Don't use it.
 
 `count` generates a report of the unique lines in the input, sorted by
