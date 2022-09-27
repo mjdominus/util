@@ -59,7 +59,12 @@ verbose; `-x` tells it to exit if any of the runs fail.
 `f` is the most useful of the bunch.  `f 6` is the same as `awk
 '{print $6}'`, except with 80% less typing.  `f -1` works.
 
-`files` is a stupid one-liner: ` "${@:-.}" \( -name .git -prune \) -o -type f -print`.
+`files` lists the files in the current Git repository that match a
+pattern.  Pattern semntics are fine-tuned to my preferences.  For
+example, `files foo` finds all the files whose base name _contains_
+`foo`, but `files foo*.py` finds all the files whose base name
+_begins_ with `foo` and ends with `.py`. With no arguments it lists
+all files, and it always omits gitignored files.
 
 `getstore _url_ _file_` fetches the file at the given URL and stores
 it in the specified file.  If you omit the filename, it will be

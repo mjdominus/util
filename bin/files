@@ -1,1 +1,62 @@
-find "${@:-.}" \( -name .git -prune \) -o -type f -print
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser
+from fnmatch import fnmatch as globmatch
+from re import sub
+from pathlib import Path
+import subprocess
+
+# TODO: use of git-ls-files already restricts listing to those
+#       under the current directory.  Maybe an option to list
+#       ALL files, with appropriate relative paths
+
+def parser():
+    # TODO: regex option
+    # TODO: case-insensitive option
+    p = ArgumentParser()
+    p.add_argument('pat', nargs='?')
+    return p
+
+# TODO: fix it up so that if git-ls-files fails, it tries find instead
+def listFiles():
+    s = subprocess.run(["git", "ls-files"], stdout=subprocess.PIPE, text=True)
+    if s.returncode != 0:
+        exit(s.returncode)
+    else:
+        return s.stdout.splitlines()
+
+# Pattern rules:
+#    patterns are treated like shell globs, not regexes
+#        (maybe add a --regex option later)
+#    percent sign is synonymous with *
+#        so you can omit quotes on the command line
+#    Unlike in the shell,
+#      globs are unanchored by default
+#      so that the pattern 'foo' finds all files whose names *contain* 'foo'
+#      not just the single file named 'foo'
+#    But a pattern with stars in it *is* anchored
+#      so that foo*.py finds files whose names BEGIN with foo
+#      whereas foo finds files whose names CONTAIN foo
+#    Patterns with no slashes are matched against the file's basename only
+#    Patterns with slashes are matched against the full path
+#
+def buildPattern(basePat):
+    pat = "*" if basePat is None else basePat
+    pat = pat.replace('%', '*')
+    if "*" not in pat:
+        pat = f"*{pat}*"
+    return pat
+
+if __name__ == '__main__':
+    p = parser()
+    args = p.parse_args()
+    pat = buildPattern(args.pat)
+    has_slash = "/" in pat
+    for f in listFiles():
+        if has_slash:
+            n = f
+        else:
+            n = Path(f).name
+        if globmatch(n, pat):
+            print(f)
+
