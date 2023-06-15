@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+#
+
+import re
+import sys
+
+default_tolerance = 0.05
+
+def round_to(x, tolerance):
+    x_ = x /tolerance
+    return int(x_ + 0.5) * tolerance
+
+def modelines(fh):
+    modes = set()
+    for line in fh:
+        match = re.search(r'"(\d+)x(\d+)', line)
+        if match is not None:
+            modes.add((int(match.group(1)), int(match.group(2))))
+    return modes
+
+def res(m, tolerance=default_tolerance):
+    return round_to(m[0] / m[1], tolerance)
+
+if __name__ == '__main__':
+    with open("/var/log/Xorg.0.log") as fh:
+        modes = modelines(fh)
+    modes = [ (m[0], m[1], res(m)) for m in modes ]
+    resolutions = { m[2] for m in modes }
+    print(resolutions)
+    for r in sorted(resolutions, reverse=True):
+        print(r)
+        dimensions = []
+        for m in sorted(modes, reverse=True, key=lambda m: m.__getitem__(0)):
+            if m[2] == r:
+                dimensions.append(f'{m[0]}x{m[1]}')
+        print("\t" +  "  ".join(dimensions))

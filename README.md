@@ -150,6 +150,10 @@ its own `ps` from the output.
 dictionary file.  With `-n` it selects more than one line.  The outputs
 are selected equiprobably, and the input is not stored in memory.
 
+`reso` prints a list of the available monitor resolutions, _grouped by
+aspect ratio_, so that you can select a resolution that has the same
+aspect ratio as the current one.
+
 `rmdups` removes duplicate files from one or more directories.
 Currently, it only removes with names of the form `foo (1).bar`, and
 only if there is an identical file named `foo.bar` in one of the
