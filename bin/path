@@ -1,0 +1,3 @@
+#!/usr/bin/perl5
+
+print join("\n", split(/:/, $ENV{PATH}), "");
