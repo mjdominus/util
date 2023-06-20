@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+from pathlib import Path
+import re
+import sys
+
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('--directory', '--dir', '-d')
+parser.add_argument('--ifs-hack', action='store_false')
+
+def set_default_args(args):
+    if args.directory is None:
+        home = os.environ["HOME"]
+        args.directory = Path(home) / "Downloads"
+    else:
+        args.directory = Path(args.directory)
+    return args
+
+def most_recent_file_in_directory(dir):
+    last_file = None
+    last_file_time = None
+    for file in dir.iterdir():
+        if file.is_file():
+            st_mtime = file.stat().st_mtime
+            if last_file is None or st_mtime > last_file_time:
+                last_file = file
+                last_file_time = st_mtime
+    return last_file
+
+def rename_file(file: Path):
+    ifs = os.environ.get("IFS", " \t\n")
+    new_file = file.with_name(re.sub(fr'[{ifs}]+', "_", file.name))
+    if new_file.name == file.name:
+        return file
+    elif new_file.exists():
+        raise Exception(f"File '{new_file !s}' already exists")
+    return file.rename(new_file)
+
+if __name__ == '__main__':
+    args = set_default_args(parser.parse_args())
+    last_file = most_recent_file_in_directory(args.directory)
+    if last_file is None:
+        exit(1)
+
+    if args.ifs_hack:
+        last_file = rename_file(last_file)
+    print(str(last_file))
+    print("lastdl:", str(last_file), file=sys.stderr)
+    exit(0)

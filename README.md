@@ -99,6 +99,12 @@ any input line to the corresponding local time.
 having to chrid there manually and then chdir back, and may save a
 conceptual step.
 
+`lastdl` searches the `$HOME/Downloads` directory for the most recent
+downloaded file, and simply prints its name. This is so that you can
+easily do `mv $(lastdl) .` or something of that sort. The shell
+mis-handles filenames that contain whitespace, so `lastdl` will rename
+the file to a whitespace-less one before printing the name.
+
 `lr` performs rudimentary statistical analysis of its input,
 including, primarily, linear regression.  The input should be two
 columns, of X and Y values, or one column, of Y values (and the X
