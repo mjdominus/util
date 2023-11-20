@@ -160,6 +160,7 @@ its own `ps` from the output.
 `randword` selects a random line from its input, by default a
 dictionary file.  With `-n` it selects more than one line.  The outputs
 are selected equiprobably, and the input is not stored in memory.
+It may soon be replaced with `sample` (see below).
 
 `reso` prints a list of the available monitor resolutions, _grouped by
 aspect ratio_, so that you can select a resolution that has the same
@@ -176,6 +177,12 @@ jobs in parallel.  [This version, by Aaron
 Crane](http://aaroncrane.co.uk/2008/07/runN/), has a better interface
 than [my original
 implementation](http://blog.plover.com/prog/runN.html).
+
+`sample` selects and prints a random sample of lines from the input.
+`sample 0.23` and `sample 23%` select each line with probability of
+23%.  (They do not guarantee to emit exactly 23% of all lines.)
+`sample 23` selects and emits exactly 23 lines, using the standard
+reservoir sampling algorithm.
 
 `shutup command args...` runs the comand with its standard output and
 standard error directed to `/dev/null`.  If the command wants to

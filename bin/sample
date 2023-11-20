@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import sys
+import random
+
+def rand():
+    return random.uniform(0, 1)
+
+def straight_sample(prob):
+    for line in sys.stdin:
+        if rand() < prob:
+            print(line, end='')
+
+def reservoir_sample(n):
+    items = []
+    i = 0
+    for line in sys.stdin:
+        i += 1
+        if rand() < n/i:
+            if len(items) < n:
+                items.append(line)
+            else:
+                items[random.randrange(n)] = line
+    for item in items:
+        print(item, end='')
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        usage()
+
+    if sys.argv[1].endswith("%"):
+        frac = float(sys.argv[1][:-1]) / 100
+        straight_sample(frac)
+    elif '.' in sys.argv[1]:
+        frac = float(sys.argv[1])
+        straight_sample(frac)
+    else:
+        n = int(sys.argv[1])
+        reservoir_sample(n)
+
