@@ -19,7 +19,7 @@ def parser():
 
 # TODO: fix it up so that if git-ls-files fails, it tries find instead
 def listFiles():
-    s = subprocess.run(["git", "ls-files"], stdout=subprocess.PIPE, text=True)
+    s = subprocess.run(["git", "ls-files"], stdout=subprocess.PIPE, encoding='utf8')
     if s.returncode != 0:
         exit(s.returncode)
     else:
