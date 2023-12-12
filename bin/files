@@ -12,9 +12,9 @@ import subprocess
 
 def parser():
     # TODO: regex option
-    # TODO: case-insensitive option
     p = ArgumentParser()
     p.add_argument('pat', nargs='?')
+    p.add_argument('--insensitive', '-i', action='store_true')
     return p
 
 # TODO: fix it up so that if git-ls-files fails, it tries find instead
@@ -40,23 +40,28 @@ def listFiles():
 #    Patterns with no slashes are matched against the file's basename only
 #    Patterns with slashes are matched against the full path
 #
-def buildPattern(basePat):
+def buildPattern(basePat, insensitive=False):
     pat = "*" if basePat is None else basePat
     pat = pat.replace('%', '*')
     if "*" not in pat:
         pat = f"*{pat}*"
-    return pat
+    return pat.lower() if insensitive else pat
 
 if __name__ == '__main__':
     p = parser()
     args = p.parse_args()
-    pat = buildPattern(args.pat)
+    pat = buildPattern(args.pat, insensitive=args.insensitive)
     has_slash = "/" in pat
     for f in listFiles():
         if has_slash:
             n = f
         else:
             n = Path(f).name
-        if globmatch(n, pat):
+        match = False
+        if args.insensitive:
+            match = globmatch(n.lower(), pat)
+        else:   
+            match = globmatch(n, pat)
+        if match:
             print(f)
 
