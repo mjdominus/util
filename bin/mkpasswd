@@ -3,39 +3,74 @@
 srand;
 use Getopt::Std;
 
-&getopts('l:cd:n:');
+# -o "old" version 1
+# -v specify version; current version is 3
+
+&getopts('ov:l:cd:n:');
 
 @fruitcake = split //, '~`!@#$%^&*()_+-=[]{}\|;:\'",.<>/?';
 $dict = defined($opt_d) ? $opt_d : '/usr/share/dict/words';
 my $nwords = ($opt_n || 1) * 2;
 my $maxl = $opt_l || 8;
+my $version = $opt_v || ($opt_o ? 1 : 3);
 
-open DICT, $dict
-    or die "Couldn't open dictionary file `$dict': $!; aborting";
+my $generator = "version_${version}";
 
-while (<DICT>) {
-  chomp;
-  next if /\W/;
-  next unless length($_) >= 3 && length($_) <= $maxl;
-  $count++;
-  next unless rand() < $nwords/$count;
-  if ($GOT >= $nwords) {
-    $words[$nwords * rand] = $_;
-  } else {
-    splice @words, rand(@words+1), 0, $_;
-  }
-  $GOT++;
-} 
+print &{$generator}(), "\n";
+exit();
 
-close DICT;
+sub version_3 {
+    my $len = $opt_l || 20;
+    my $p = "";
+    my @chars = (['a' .. 'z'], ['A' .. 'Z'], [0 .. 9]);
+    for (1..4) {
+        my $chars = $chars[rand @chars];
+        my $n = 3 + int(rand(6));
+        $n = $len if $n > $len;
+        $len -= $n;
+        for (1 .. $n) {
+            $p .= $chars->[rand @$chars];
+        }
+    }
+    return $p;
+}
 
-while (@words) {
-  my $pw = 
-      randcap(shift @words) .
-      $fruitcake[rand @fruitcake].
-          randcap(shift @words);
-  print crypt($pw, rand_salt()), " " if $opt_c;
-  print $pw, "\n";
+sub version_2 {
+    my $len = $opt_l || 20;
+    my $p = "";
+    my @chars = ('a' .. 'z', 'A' .. 'Z', 0 .. 9);
+    for (1 .. $len) { $p .= $chars[rand @chars] }
+    return $p;
+}
+
+sub version_1 {
+    open DICT, $dict
+        or die "Couldn't open dictionary file `$dict': $!; aborting";
+
+    while (<DICT>) {
+        chomp;
+        next if /\W/;
+        next unless length($_) >= 3 && length($_) <= $maxl;
+        $count++;
+        next unless rand() < $nwords/$count;
+        if ($GOT >= $nwords) {
+            $words[$nwords * rand] = $_;
+        } else {
+            splice @words, rand(@words+1), 0, $_;
+        }
+        $GOT++;
+    } 
+
+    close DICT;
+
+    while (@words) {
+        my $pw = 
+            randcap(shift @words) .
+            $fruitcake[rand @fruitcake].
+            randcap(shift @words);
+        print crypt($pw, rand_salt()), " " if $opt_c;
+        return $pw;
+    }
 }
 
 sub rand_salt {
