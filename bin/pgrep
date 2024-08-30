@@ -61,7 +61,13 @@ sub do_file {
     chomp;
     if (/$qr/ ^ $opt_v) {
       $rc = 0;                  # match
-      printf $format, $file, $_, $.;
+      my $match = $&;  # not considered best practice but probably unimportant
+      # If $opt_0 has us looking at multiline 'records',
+      # the entire record is probably not helpful (it might be the whole file)
+      # instead, the match text is just $&
+      my $output = defined($opt_0) && $match =~ /\n/ ? $match : $_;
+
+      printf $format, $file, $output, $.;
       return if $opt_l;
     }
   }
@@ -82,6 +88,8 @@ sub usage {
     -q           print nothing
     -u           make output unbuffered
     -v           invert matching
+    -0 str       set Perl record separator (\$/) to 'str'
+                 don't forget you might need to add (?s) to your pattern!
 EOM
   exit 2;
 }
