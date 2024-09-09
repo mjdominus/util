@@ -1,5 +1,23 @@
 #!/bin/bash
-dir=${1:-$(echo "Usage: indir directory command args..." 1>&2; exit 2)}
+
+usage() {
+    echo "Usage: indir [-v] directory command args..." 1>&2
+    exit 2
+}
+
+verbose=false
+case "$1" in
+  -v | --verbose )
+    verbose=true
+    shift
+    ;;
+  -* )
+    usage
+  ;;
+esac
+
+dir=${1:-`usage`}
 shift
+if $verbose; then echo "in $dir :" 1>&2; fi
 cd $dir || exit 1
 exec "$@"
