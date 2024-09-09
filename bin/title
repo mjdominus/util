@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+
+my $title = join " ", @ARGV;
+$title = qx{hostname -s || hostname} if $title eq "";
+chomp $title;
+print "\e]0;$title\cG";

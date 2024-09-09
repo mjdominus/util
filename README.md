@@ -223,6 +223,10 @@ different suffix.  For example, `mv $i $(suf $i .jpg)` moves `img.gif`
 to `img.jpg`.  People usually do this with `basename` but `suf` is
 shorter and easier.
 
+`title` sets the title of the current terminal window.  Multiple
+arguments are joined with spaces and used as the title.  With no
+arguments, it uses the current hostname.
+
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
 
