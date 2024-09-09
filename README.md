@@ -227,6 +227,10 @@ shorter and easier.
 arguments are joined with spaces and used as the title.  With no
 arguments, it uses the current hostname.
 
+`trim` trims the trailing whitespace from each line in the files named
+in the arguments, and rewrites the files in place.  With no arguments,
+it works as a filter.
+
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
 
@@ -244,4 +248,3 @@ compressed, but
         z perl -lne 'print if /octopus/' *
 
 does.
-
