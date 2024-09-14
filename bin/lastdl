@@ -36,7 +36,8 @@ def rename_file(file: Path):
         return file
     elif new_file.exists():
         raise Exception(f"File '{new_file !s}' already exists")
-    return file.rename(new_file)
+    file.rename(new_file)
+    return new_file
 
 if __name__ == '__main__':
     args = set_default_args(parser.parse_args())
