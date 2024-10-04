@@ -58,6 +58,8 @@ verbose; `-x` tells it to exit if any of the runs fail.
 
 `f` is the most useful of the bunch.  `f 6` is the same as `awk
 '{print $6}'`, except with 80% less typing.  `f -1` works.
+The special syntax `f 3..` or `f -3..` tells `f` to print all the
+fields form the specified one nutil the end.
 
 `files` lists the files in the current Git repository that match a
 pattern.  Pattern semntics are fine-tuned to my preferences.  For
