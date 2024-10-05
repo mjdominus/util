@@ -25,14 +25,28 @@ def cache(p, h):
     global hashcache
     if h in hashcache:
         hashcache[h].add(p)
-    else: 
+    else:
         hashcache[h] = set([p])
 
-def examine_files_in_dir(dir):
+def examine_files_in_dir(dir, verbose=False):
     global hashcache
     d = Path(dir)
-    for p in d.iterdir():
+    paths = [ p for p in d.iterdir() if p.is_file() ]
+    if verbose and len(paths) > 50:
+        print(f"Examining {len(paths)} items in {dir}", file=sys.stderr)
+
+    examined = 0
+    nl = False
+    for p in paths:
+        if not p.is_file():
+            continue
         cache(p, hash_file(p))
+        examined += 1
+        if verbose and examined % 10 == 0:
+            nl = True
+            print(".", end="", file=sys.stderr, flush=True)
+    if verbose and nl:
+        print(file=sys.stderr)
 
 def remove_file(f, noaction=False, verbose=False):
     if noaction:
@@ -45,14 +59,19 @@ def remove_file(f, noaction=False, verbose=False):
 def remove_duplicates_in_file_group(paths, noaction=False, verbose=False):
     """These files are all identical.  Figure out
     which one we want to keep and discard the others
-    
+
     First cut: if one is named `foo.bar`, remove the ones named
     `foo (\d+).bar`
     """
+
     names = [p.name for p in paths]
     for p in paths:
         m = re.match(r'(.+) \(\d+\)(\..+)', p.name)
-        if m is not None:
+        if m is None:
+            if verbose and p.name != names[0]:
+                print(f"rm {p.name}   # looks like {names[0]}",
+                      file=sys.stderr)
+        else:
             base = m.group(1) + m.group(2)
             if base in names:
                 remove_file(p, noaction=noaction, verbose=verbose)
@@ -70,6 +89,6 @@ if __name__ == '__main__':
     if len(args.directories) == 0:
         args.directories = [ "." ]
     for d in args.directories:
-        examine_files_in_dir(d)
+        examine_files_in_dir(d, args.verbose)
     for group in hashcache.values():
         remove_duplicates_in_file_group(group, verbose=args.verbose, noaction=args.dry_run)
