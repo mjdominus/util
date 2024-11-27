@@ -1,7 +1,10 @@
 #!/usr/bin/perl
 
+use v5.14;
 use Getopt::Std;
-my $opts = '0:ulhIive:F:qB';
+our ($opt_e, $opt_0, $opt_u, $opt_U, $opt_l, $opt_h, $opt_I, $opt_i,
+     $opt_v, $opt_F, $opt_q, $opt_B);
+my $opts = '0:uUlhIive:F:qB';
 getopts($opts) or usage();
 my $pat = defined($opt_e) ? $opt_e : @ARGV ? shift : usage();
 my $qr = $opt_i ? qr/$pat/i : qr/$pat/;
@@ -27,9 +30,13 @@ if (defined $opt_F) {
   }
 }
 
-$| = 1 if $opt_u;
+$| = 1;
+if ($opt_u) {
+    die "-u and -U are incompatible\n" if $opt_U;
+    $| = 0;
+}
 
-$rc = 1;  # No matches;
+my $rc = 1;  # No matches;
 
 if ($opt_I) {
   while (<STDIN>) { chomp; do_file($_) }
@@ -78,7 +85,7 @@ sub usage {
  Usage: $0 [$opts] pattern files...
 
     -B           don't ignore binary files
-    -F format    printf-style output format 
+    -F format    printf-style output format
                  (%1\$s = filename, %2\$s = text, %3\$d = line number)
     -e pattern   specify pattern
     -h           omit filenames
@@ -86,7 +93,8 @@ sub usage {
     -I           list of files on STDIN instead of in ARGV
     -l           print filenames only
     -q           print nothing
-    -u           make output unbuffered
+    -u           make output unbuffered (default)
+    -U           make output buffered
     -v           invert matching
     -0 str       set Perl record separator (\$/) to 'str'
                  don't forget you might need to add (?s) to your pattern!
