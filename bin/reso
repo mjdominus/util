@@ -26,7 +26,7 @@ if __name__ == '__main__':
         modes = modelines(fh)
     modes = [ (m[0], m[1], res(m)) for m in modes ]
     resolutions = { m[2] for m in modes }
-    print(resolutions)
+    #    print(resolutions)
     for r in sorted(resolutions, reverse=True):
         print(r)
         dimensions = []
