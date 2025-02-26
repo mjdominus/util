@@ -193,7 +193,7 @@ does _not_ detach the terminal, so the subcommand is free to redirect
 its output to `/dev/tty` if it likes
 
 `sort-natural` sorts its input lines like `sort`, but arranges to sort
-the numeric parts of the lines numerically. For example, 
+the numeric parts of the lines numerically. For example,
 
         a a1 a10 a100 a10x a2 a21 a3 ab b
 
@@ -235,6 +235,10 @@ it works as a filter.
 
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
+
+`yorn` reads lines from standard input, prompts _on the terminal_ for
+a 'y' or 'n' response, and prints the selected lines on standard
+utput.
 
 `z command args...` tries to run the command on the specified
 arguments, but if any of those arguments appear to be compressed
