@@ -72,6 +72,9 @@ all files, and it always omits gitignored files.
 it in the specified file.  If you omit the filename, it will be
 inferred from the URL.
 
+`gre` is a triviality.  I often mistype `grep foo bar` as `gre pfoo
+bar`.  This fixes that.
+
 `guessfile` takes  a list of patterns
 and prints out name of  files matching one of the patterns.
 Patterns are shell glob style,
