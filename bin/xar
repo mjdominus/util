@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+#
+# Version of xargs that will be easier to use
+#
+
+#
+# 1. Replace each % with the filename, if there are any
+# 2. Otherwise put the filename at the end of the line
+# 3. Run one command per argument unless there is (some flag)
+# 4. On error, continue anyway
+# 5. Need -0 flag to allow NUL-termination
+
+import subprocess
+import sys
+
+def command_has_percent(command):
+    for word in command:
+        if "%" in word:
+            return True
+    return False
+
+def substitute_percents(target, replacement):
+    return [ s.replace("%", replacement) for s in target ]
+
+def run_command_with_filename(command_template, filename):
+    command = command_template.copy()
+    if not command_has_percent(command):
+        command.append("%")
+
+    res = subprocess.run(substitute_percents(command, filename), check=False)
+    return res.returncode == 0
+
+if __name__ == '__main__':
+    template = sys.argv[1:]
+    ok = True
+    for line in sys.stdin:
+        if line.endswith("\n"):
+            line = line[:-1]
+        if not run_command_with_filename(template, line):
+            ok = False
+    exit(0 if ok else 1)

@@ -239,6 +239,12 @@ it works as a filter.
 `with-memory-limit` runs a command with its memory limited by the
 `rlimit` facility.
 
+`xar` is a stripped-down version of `xargs`. `xargs mv % %.bak` reads
+lines from standard input, trims off a trailing newline, if any, and
+runs the command `mv foo foo.bak` for each line `foo`.  If the
+command template contains no `%` signs, an extra `%` argument is
+implied at the end.
+
 `yorn` reads lines from standard input, prompts _on the terminal_ for
 a 'y' or 'n' response, and prints the selected lines on standard
 utput.
